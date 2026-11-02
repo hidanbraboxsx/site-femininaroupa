@@ -136,6 +136,7 @@ export function stockOverview() {
  name: product.name,
  sku: product.sku,
  category: product.category,
+ images: product.images || (product.image ? [product.image] : []),
  total,
  costValue,
  saleValue,

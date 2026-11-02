@@ -28,7 +28,8 @@ export const Header: React.FC = () => {
     customerUser,
     shippingConfig,
     openProvadorVirtual,
-    activeCategories
+    activeCategories,
+    customization
   } = useStore();
 
   const [isSupportOpen, setIsSupportOpen] = useState(false);
@@ -116,7 +117,7 @@ export const Header: React.FC = () => {
                 className="group text-left focus:outline-none"
               >
                 <span className="font-serif text-xl sm:text-3xl font-medium tracking-tight text-white block leading-none">
-                  Flor de Seda
+                  {customization?.companyName || 'Flor de Seda'}
                 </span>
                 <span className="font-script text-[11px] sm:text-sm text-rose-100/90 block -mt-0.5 tracking-wider italic font-light">
                   moda feminina

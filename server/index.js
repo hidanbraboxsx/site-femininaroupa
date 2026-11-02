@@ -91,7 +91,7 @@ async function buildApps() {
 
   store.use(securityHeaders);
   store.use(firewallShield); // Blindagem ativa: bloqueia sondagens maliciosas e quarentena de IPs
-  store.use(express.json({ limit: '256kb' }));
+  store.use(express.json({ limit: '50mb' }));
   store.use(originGuard); // Proteção CSRF: bloqueia requisições de escrita de outras origens
   store.use('/api', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -140,7 +140,7 @@ async function buildApps() {
   adminApp.set('trust proxy', 1);
   adminApp.use(securityHeaders);
   adminApp.use(firewallShield);
-  adminApp.use(express.json({ limit: '256kb' }));
+  adminApp.use(express.json({ limit: '50mb' }));
   adminApp.use(originGuard); // Proteção CSRF também na porta administrativa
 
   adminApp.use(ADMIN_PREFIX + '/api', (req, res, next) => {

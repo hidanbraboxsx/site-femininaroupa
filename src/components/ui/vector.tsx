@@ -264,3 +264,43 @@ export const MeasureIllustration: React.FC<{
     </svg>
   );
 };
+
+/** Ícone oficial vetorial do TikTok */
+export const IconTikTok: React.FC<React.SVGProps<SVGSVGElement> & { size?: number }> = ({
+  size = 20,
+  className = '',
+  ...props
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+    focusable={false}
+    {...props}
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.3 6.3 0 0 0 1.86-4.49V8.58a8.28 8.28 0 0 0 4.84 1.56V6.69h-.93Z" />
+  </svg>
+);
+
+/** Ícone oficial vetorial do Pinterest */
+export const IconPinterest: React.FC<React.SVGProps<SVGSVGElement> & { size?: number }> = ({
+  size = 20,
+  className = '',
+  ...props
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+    focusable={false}
+    {...props}
+  >
+    <path d="M12 2a10 10 0 0 0-3.66 19.31c.14-.85.27-2.16.05-3.09l1.45-6.17s-.37-.74-.37-1.84c0-1.73 1-3.02 2.26-3.02 1.06 0 1.58.8 1.58 1.76 0 1.07-.68 2.68-1.04 4.17-.3 1.25.63 2.27 1.86 2.27 2.24 0 3.96-2.36 3.96-5.77 0-3.02-2.17-5.13-5.27-5.13-3.59 0-5.7 2.69-5.7 5.48 0 1.08.42 2.25.94 2.88.1.13.12.24.09.37l-.35 1.45c-.06.23-.19.28-.43.17-1.61-.75-2.62-3.11-2.62-5.01 0-4.08 2.97-7.83 8.56-7.83 4.49 0 7.98 3.2 7.98 7.48 0 4.46-2.81 8.05-6.72 8.05-1.31 0-2.55-.68-2.97-1.49l-.81 3.09c-.29 1.13-1.08 2.54-1.61 3.41A10 10 0 1 0 12 2Z" />
+  </svg>
+);

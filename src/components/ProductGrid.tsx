@@ -90,11 +90,6 @@ export const ProductGrid: React.FC = () => {
           className="w-12 h-[2.5px] mx-auto mt-2 rounded-full"
           style={{ backgroundColor: customization.primaryColor }}
         />
-        {selectedCategory === 'Novidades' && (
-          <p className="text-xs text-stone-500 mt-2 font-light max-w-md mx-auto">
-            Coleção recém-chegada com tecidos nobres, fluidez e acabamentos delicados.
-          </p>
-        )}
       </div>
 
       {/* Filter and Sorting Bar - Stable non-shifting layout */}

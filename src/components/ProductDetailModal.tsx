@@ -484,10 +484,14 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                   <button
                     type="button"
                     onClick={() => openProvadorVirtual(product)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#DC7898] hover:text-[#C65677] transition-colors underline underline-offset-4 self-start sm:self-auto cursor-pointer"
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-50 via-pink-50 to-white hover:from-rose-100 hover:to-pink-100 border border-rose-200/90 text-rose-700 text-xs font-bold shadow-[0_2px_6px_rgba(220,120,152,0.18)] hover:shadow-[0_4px_12px_rgba(220,120,152,0.28)] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer group self-start sm:self-auto"
+                    title="Abrir Provador Virtual Inteligente 3D e Tabela de Medidas"
                   >
-                    <Ruler className="w-3.5 h-3.5 text-[#DC7898]" />
-                    <span>Tabela de Medidas & Provador</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white text-[#DC7898] shadow-2xs group-hover:scale-110 transition-transform">
+                      <Ruler className="w-3 h-3 text-[#DC7898]" />
+                    </span>
+                    <span className="tracking-tight">Provador Virtual 3D & Medidas</span>
+                    <Sparkles className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 transition-colors" />
                   </button>
                 </div>
 

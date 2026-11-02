@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { IconWhatsApp } from './ui/vector';
+import { IconWhatsApp, IconTikTok, IconPinterest } from './ui/vector';
 import { 
   Instagram, 
   MessageCircle, 
@@ -104,7 +104,7 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <div>
               <span className="font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#2D2427] block leading-none">
-                Flor de Seda
+                {customization?.companyName || 'Flor de Seda'}
               </span>
               <span className="font-script text-xs sm:text-sm text-[#DC7898] block italic font-light mt-0.5">
                 moda feminina
@@ -139,10 +139,10 @@ export const Footer: React.FC = () => {
                   href={tiktokUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-rose-200 hover:bg-stone-900 hover:border-stone-900 text-stone-700 hover:text-white flex items-center justify-center transition-all shadow-2xs text-xs font-bold font-mono group"
+                  className="w-9 h-9 rounded-full bg-white border border-rose-200 hover:bg-stone-900 hover:border-stone-900 text-stone-700 hover:text-white flex items-center justify-center transition-all shadow-2xs group"
                   title="TikTok Oficial"
                 >
-                  <span className="group-hover:scale-110 transition-transform">TK</span>
+                  <IconTikTok size={18} className="w-[18px] h-[18px] transition-transform group-hover:scale-110" />
                 </a>
               )}
               {pinterestUrl && (
@@ -150,10 +150,10 @@ export const Footer: React.FC = () => {
                   href={pinterestUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-rose-200 hover:bg-red-600 hover:border-red-600 text-stone-700 hover:text-white flex items-center justify-center transition-all shadow-2xs text-xs font-bold font-serif group"
+                  className="w-9 h-9 rounded-full bg-white border border-rose-200 hover:bg-red-600 hover:border-red-600 text-[#E60023] hover:text-white flex items-center justify-center transition-all shadow-2xs group"
                   title="Pinterest Oficial"
                 >
-                  <span className="group-hover:scale-110 transition-transform">P</span>
+                  <IconPinterest size={18} className="w-[18px] h-[18px] transition-transform group-hover:scale-110" />
                 </a>
               )}
             </div>

@@ -149,7 +149,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
 
-/** Aba em formato de pílula, usada dentro do ModalShell. */
+/** Aba em formato de pílula com efeito 3D tátil e moderno, usada dentro do ModalShell. */
 export const ModalTab: React.FC<{
   active: boolean;
   onClick: () => void;
@@ -160,13 +160,15 @@ export const ModalTab: React.FC<{
     type="button"
     onClick={onClick}
     aria-pressed={active}
-    className={`flex flex-1 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-2.5 py-1.5 sm:px-3 sm:py-2 text-[10.5px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
+    className={`group relative flex flex-1 items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-bold transition-all duration-200 cursor-pointer select-none whitespace-nowrap ${
       active
-        ? 'bg-[#DC7898] text-white shadow-[0_8px_20px_-10px_rgba(220,120,152,0.9)]'
-        : 'text-stone-500 hover:bg-rose-50 hover:text-stone-800'
+        ? 'bg-gradient-to-b from-[#e88aa7] to-[#d46a8b] text-white shadow-[0_6px_16px_rgba(220,120,152,0.38),inset_0_1px_1px_rgba(255,255,255,0.45)] border-t border-white/40 -translate-y-0.5'
+        : 'bg-white/90 text-stone-600 hover:bg-rose-50/60 hover:text-stone-900 border border-rose-100 shadow-[0_2px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_3px_8px_rgba(220,120,152,0.12)] active:translate-y-0'
     }`}
   >
-    <span className={active ? 'text-white' : 'text-[#C66382]'}>{icon}</span>
+    <span className={`transition-transform duration-200 shrink-0 ${active ? 'text-white scale-110 drop-shadow-xs' : 'text-[#C66382] group-hover:scale-105'}`}>
+      {icon}
+    </span>
     <span className="truncate">{children}</span>
   </button>
 );

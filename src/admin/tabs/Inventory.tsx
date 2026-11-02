@@ -170,7 +170,7 @@ export function StockTab({ liveKey }: { liveKey: number }) {
               <div key={product.id} className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-3.5 shadow-sm hover:border-rose-500/30 transition-all">
                 <div className="flex items-start gap-3 mb-2.5">
                   {product.images?.[0] ? (
-                    <img src={product.images[0]} alt="" className="h-12 w-12 rounded-xl object-cover border border-[var(--admin-border)] shrink-0 shadow-xs" />
+                    <img src={product.images[0]} alt="" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} className="h-12 w-12 rounded-xl object-cover border border-[var(--admin-border)] shrink-0 shadow-xs" />
                   ) : (
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black/10 dark:bg-white/5 border border-[var(--admin-border)] shrink-0">
                       <ImageIcon className="h-5 w-5 text-stone-500" />
@@ -835,7 +835,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                   <div className="flex gap-2 flex-wrap">
                     {previewPhotos.map((imgUrl: string, idx: number) => (
                       <div key={idx} className="relative group rounded-xl overflow-hidden border border-[var(--admin-border)] bg-black/20 shadow-xs">
-                        <img src={imgUrl} alt="" className="h-16 w-16 object-cover" />
+                        <img src={imgUrl} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'; }} className="h-16 w-16 object-cover" />
                         <button
                           type="button"
                           onClick={() => {
@@ -889,7 +889,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
               <div className="rounded-2xl border border-white/10 bg-white dark:bg-stone-900 shadow-md overflow-hidden text-stone-900 dark:text-stone-100">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
                   {previewPhotos[0] ? (
-                    <img src={previewPhotos[0]} alt="" className="h-full w-full object-cover" />
+                    <img src={previewPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'; }} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-stone-400">
                       <ImageIcon className="h-12 w-12 stroke-1" />

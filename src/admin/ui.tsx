@@ -351,17 +351,46 @@ export function ImageUploader({
   const [urlInput, setUrlInput] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files || !files[0]) return;
-    const file = files[0];
-    if (!file.type.startsWith('image/')) return;
+  const processImageFile = (file: File) => {
+    if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      if (typeof e.target?.result === 'string') {
-        onChange(e.target.result);
-      }
+      const dataUrl = typeof e.target?.result === 'string' ? e.target.result : '';
+      if (!dataUrl) return;
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          onChange(canvas.toDataURL('image/jpeg', 0.86));
+        } else {
+          onChange(dataUrl);
+        }
+      };
+      img.onerror = () => onChange(dataUrl);
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files || !files[0]) return;
+    processImageFile(files[0]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -372,13 +401,7 @@ export function ImageUploader({
       if (items[i].type.indexOf('image') !== -1) {
         const file = items[i].getAsFile();
         if (file) {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            if (typeof ev.target?.result === 'string') {
-              onChange(ev.target.result);
-            }
-          };
-          reader.readAsDataURL(file);
+          processImageFile(file);
           e.preventDefault();
           break;
         }
