@@ -32,23 +32,23 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "PP-Rosa Floral Rosé": 3,
-      "P-Rosa Floral Rosé": 7,
-      "M-Rosa Floral Rosé": 6,
-      "G-Rosa Floral Rosé": 4,
-      "GG-Rosa Floral Rosé": 2,
-      "PP-Marfim Suave": 2,
-      "P-Marfim Suave": 4,
-      "M-Marfim Suave": 5,
-      "G-Marfim Suave": 3,
-      "GG-Marfim Suave": 1
+      "PP-Rosa Floral Rosé": 0,
+      "P-Rosa Floral Rosé": 0,
+      "M-Rosa Floral Rosé": 0,
+      "G-Rosa Floral Rosé": 0,
+      "GG-Rosa Floral Rosé": 0,
+      "PP-Marfim Suave": 0,
+      "P-Marfim Suave": 0,
+      "M-Marfim Suave": 0,
+      "G-Marfim Suave": 0,
+      "GG-Marfim Suave": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": true,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Floral",
       "Romântico",
@@ -86,21 +86,21 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "PP-Rosa Chiclete Suave": 4,
-      "P-Rosa Chiclete Suave": 8,
-      "M-Rosa Chiclete Suave": 7,
-      "G-Rosa Chiclete Suave": 3,
-      "PP-Branco Neve": 3,
-      "P-Branco Neve": 6,
-      "M-Branco Neve": 5,
-      "G-Branco Neve": 2
+      "PP-Rosa Chiclete Suave": 0,
+      "P-Rosa Chiclete Suave": 0,
+      "M-Rosa Chiclete Suave": 0,
+      "G-Rosa Chiclete Suave": 0,
+      "PP-Branco Neve": 0,
+      "P-Branco Neve": 0,
+      "M-Branco Neve": 0,
+      "G-Branco Neve": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": true,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Cropped",
       "Verão",
@@ -136,18 +136,18 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "36-Denim Médio Clássico": 5,
-      "38-Denim Médio Clássico": 9,
-      "40-Denim Médio Clássico": 8,
-      "42-Denim Médio Clássico": 4,
-      "44-Denim Médio Clássico": 2
+      "36-Denim Médio Clássico": 0,
+      "38-Denim Médio Clássico": 0,
+      "40-Denim Médio Clássico": 0,
+      "42-Denim Médio Clássico": 0,
+      "44-Denim Médio Clássico": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": false,
     "isBestSeller": true,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Jeans",
       "Cintura Alta",
@@ -184,19 +184,19 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "P-Linho Areia Natural": 4,
-      "M-Linho Areia Natural": 6,
-      "G-Linho Areia Natural": 3,
-      "P-Rosa Chá Suave": 5,
-      "M-Rosa Chá Suave": 7,
-      "G-Rosa Chá Suave": 2
+      "P-Linho Areia Natural": 0,
+      "M-Linho Areia Natural": 0,
+      "G-Linho Areia Natural": 0,
+      "P-Rosa Chá Suave": 0,
+      "M-Rosa Chá Suave": 0,
+      "G-Rosa Chá Suave": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": true,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Linho",
       "Resort",
@@ -235,21 +235,21 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "36-Blush Rosé": 4,
-      "38-Blush Rosé": 6,
-      "40-Blush Rosé": 5,
-      "42-Blush Rosé": 2,
-      "36-Off-White": 3,
-      "38-Off-White": 5,
-      "40-Off-White": 4,
-      "42-Off-White": 1
+      "36-Blush Rosé": 0,
+      "38-Blush Rosé": 0,
+      "40-Blush Rosé": 0,
+      "42-Blush Rosé": 0,
+      "36-Off-White": 0,
+      "38-Off-White": 0,
+      "40-Off-White": 0,
+      "42-Off-White": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": false,
     "isBestSeller": true,
     "isFeatured": false,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Alfaiataria",
       "Elegante",
@@ -289,23 +289,23 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "PP-Rosa Quartzo": 3,
-      "P-Rosa Quartzo": 5,
-      "M-Rosa Quartzo": 6,
-      "G-Rosa Quartzo": 3,
-      "GG-Rosa Quartzo": 1,
-      "PP-Champagne Nobre": 2,
-      "P-Champagne Nobre": 4,
-      "M-Champagne Nobre": 3,
-      "G-Champagne Nobre": 2,
-      "GG-Champagne Nobre": 1
+      "PP-Rosa Quartzo": 0,
+      "P-Rosa Quartzo": 0,
+      "M-Rosa Quartzo": 0,
+      "G-Rosa Quartzo": 0,
+      "GG-Rosa Quartzo": 0,
+      "PP-Champagne Nobre": 0,
+      "P-Champagne Nobre": 0,
+      "M-Champagne Nobre": 0,
+      "G-Champagne Nobre": 0,
+      "GG-Champagne Nobre": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": true,
     "isFeatured": false,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Festa",
       "Plissado",
@@ -343,19 +343,19 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "P-Rosa Pastel": 4,
-      "M-Rosa Pastel": 7,
-      "G-Rosa Pastel": 3,
-      "P-Off-White Pérola": 5,
-      "M-Off-White Pérola": 6,
-      "G-Off-White Pérola": 2
+      "P-Rosa Pastel": 0,
+      "M-Rosa Pastel": 0,
+      "G-Rosa Pastel": 0,
+      "P-Off-White Pérola": 0,
+      "M-Off-White Pérola": 0,
+      "G-Off-White Pérola": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": true,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Tricot",
       "Conforto",
@@ -394,21 +394,21 @@ export const INITIAL_CATALOG = [
       }
     ],
     "inventory": {
-      "PP-Champagne Rosé": 3,
-      "P-Champagne Rosé": 6,
-      "M-Champagne Rosé": 5,
-      "G-Champagne Rosé": 2,
-      "PP-Rosa Quartzo": 2,
-      "P-Rosa Quartzo": 5,
-      "M-Rosa Quartzo": 4,
-      "G-Rosa Quartzo": 1
+      "PP-Champagne Rosé": 0,
+      "P-Champagne Rosé": 0,
+      "M-Champagne Rosé": 0,
+      "G-Champagne Rosé": 0,
+      "PP-Rosa Quartzo": 0,
+      "P-Rosa Quartzo": 0,
+      "M-Rosa Quartzo": 0,
+      "G-Rosa Quartzo": 0
     },
     "rating": 0,
     "reviewsCount": 0,
     "isNewArrival": true,
     "isBestSeller": false,
     "isFeatured": true,
-    "inStock": true,
+    "inStock": false,
     "tags": [
       "Plissada",
       "Feminina",

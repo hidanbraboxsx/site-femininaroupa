@@ -1,3 +1,4 @@
+const SAFE_IMG_PLACEHOLDER = "data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.5%22%3E%3Crect width=%2218%22 height=%2218%22 x=%223%22 y=%223%22 rx=%222%22/%3E%3Ccircle cx=%229%22 cy=%229%22 r=%222%22/%3E%3Cpath d=%22m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21%22/%3E%3C/svg%3E";
 import React, { useState } from 'react';
 import {
   ArrowDownLeft,
@@ -434,7 +435,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
     toast.push(result.ok ? 'Produto removido.' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
-  const previewPhotos = Array.isArray(form.images) ? form.images : (form.images ? [form.images] : []);
+  const previewPhotos = (Array.isArray(form.images) ? form.images : (form.images ? [form.images] : [])).filter((u: any) => typeof u === 'string' && u.trim().length > 0);
   const previewColors = parseColors(form.colors || '');
   const previewSizes = form.sizes ? form.sizes.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
@@ -845,7 +846,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                   <div className="flex gap-2 flex-wrap">
                     {previewPhotos.map((imgUrl: string, idx: number) => (
                       <div key={idx} className="relative group rounded-xl overflow-hidden border border-[var(--admin-border)] bg-black/20 shadow-xs">
-                        <img src={imgUrl} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'; }} className="h-16 w-16 object-cover" />
+                        <img src={imgUrl} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-16 w-16 object-cover" />
                         <button
                           type="button"
                           onClick={() => {
@@ -899,7 +900,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
               <div className="rounded-2xl border border-white/10 bg-white dark:bg-stone-900 shadow-md overflow-hidden text-stone-900 dark:text-stone-100">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
                   {previewPhotos[0] ? (
-                    <img src={previewPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="1"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'; }} className="h-full w-full object-cover" />
+                    <img src={previewPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-stone-400">
                       <ImageIcon className="h-12 w-12 stroke-1" />

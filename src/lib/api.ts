@@ -218,9 +218,11 @@ async function adminRequest<T>(path: string, options: RequestInit = {}): Promise
     });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
-      adminToken.set('');
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('aura:admin:unauthorized'));
+      if (path === '/auth/session') {
+        adminToken.set('');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('aura:admin:unauthorized'));
+        }
       }
     }
     throw error;

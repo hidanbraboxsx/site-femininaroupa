@@ -410,8 +410,11 @@ export function ImageUploader({
   };
 
   const handleUrlSubmit = () => {
-    const clean = urlInput.trim();
+    let clean = urlInput.trim();
     if (!clean) return;
+    if (!clean.startsWith('http://') && !clean.startsWith('https://') && !clean.startsWith('data:image/') && !clean.startsWith('/')) {
+      clean = 'https://' + clean;
+    }
     onChange(clean);
     setUrlInput('');
   };
@@ -452,9 +455,7 @@ export function ImageUploader({
 
         {value ? (
           <div className="relative group w-full flex items-center justify-center">
-            <img
-              src={value}
-              alt="Preview"
+            <img src={value} alt="Preview" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E"; }}
               className={cn(
                 'rounded-lg object-contain bg-black/40 border border-white/10 shadow-md',
                 compact ? 'max-h-20' : 'max-h-36'

@@ -148,7 +148,7 @@ export function dashboardMetrics() {
  const criticalVariants = [];
  for (const product of data.products) {
  for (const [variantKey, value] of Object.entries(product.inventory || {})) {
- if (Number(value) <= config.lowStockThreshold) {
+ if (Number(value) > 0 && Number(value) <= config.lowStockThreshold) {
  criticalVariants.push({ productId: product.id, name: product.name, variantKey, stock: Number(value) });
  }
  }

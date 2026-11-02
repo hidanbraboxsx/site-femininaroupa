@@ -31,6 +31,20 @@ import { sendTelegramMessage } from './telegram-service.js';
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const challenges = new Map();
 
+function getAdminSignKey() {
+  const seed = process.env.MASTER_KEY || process.env.ADMIN_SECRET || (config.bootstrapPassword + ':' + config.bootstrapUser + ':' + config.adminPath + ':aura_adm_v1');
+  return crypto.createHash('sha256').update(seed).digest();
+}
+
+export function generateAdminToken(adminId, expiresAt) {
+  const exp = new Date(expiresAt).getTime();
+  const nonce = randomToken(16);
+  const payload = adminId + '.' + exp + '.' + nonce;
+  const sig = crypto.createHmac('sha256', getAdminSignKey()).update(payload).digest('base64url');
+  return 'aura_adm.' + payload + '.' + sig;
+}
+
+
 /* ------------------------------------------------------------------ *
  * Caminho criptografado
  * ------------------------------------------------------------------ */
@@ -160,9 +174,9 @@ export async function loginAdmin({ username, password, ip, userAgent }) {
 
  clearFailures(ip);
 
- const token = randomToken(32);
  const sessionId = nextId('ses');
- const expiresAt = new Date(Date.now() + config.adminSessionHours * 3600 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + config.adminSessionHours * 3600 * 1000).toISOString();
+  const token = generateAdminToken(admin.id, expiresAt);
 
  commit((data) => {
  const record = data.adminUsers.find((entry) => entry.id === admin.id);
@@ -311,9 +325,9 @@ export function verifySecondFactor({ challengeId, code, ip, userAgent }) {
  challenges.delete(challengeId);
  clearFailures(ip);
 
- const token = randomToken(32);
  const sessionId = nextId('ses');
- const expiresAt = new Date(Date.now() + config.adminSessionHours * 3600 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + config.adminSessionHours * 3600 * 1000).toISOString();
+  const token = generateAdminToken(admin.id, expiresAt);
 
  commit((data) => {
  const record = data.adminUsers.find((entry) => entry.id === admin.id);
@@ -364,10 +378,10 @@ export function createSessionForAdmin(adminId, { ip, userAgent, ttlMinutes = nul
  const admin = db().adminUsers.find((entry) => entry.id === adminId);
  if (!admin) throw new HttpError(401, 'Administrador não encontrado.', 'invalid_admin');
 
- const token = randomToken(32);
  const sessionId = nextId('ses');
- const minutes = ttlMinutes || config.adminSessionHours * 60;
- const expiresAt = new Date(Date.now() + minutes * 60000).toISOString();
+  const minutes = ttlMinutes || config.adminSessionHours * 60;
+  const expiresAt = new Date(Date.now() + minutes * 60000).toISOString();
+  const token = generateAdminToken(admin.id, expiresAt);
 
  commit((data) => {
  const record = data.adminUsers.find((entry) => entry.id === admin.id);
@@ -427,12 +441,41 @@ export function consumeEntryToken(token, { ip, userAgent } = {}) {
  return session;
 }
 
-export function resolveSession(token) { if (!token) return null;
- const hash = sha256(token);
- const session = db().adminSessions.find((entry) => constantTimeEqual(entry.tokenHash, hash));
- if (!session) return null;
- if (new Date(session.expiresAt).getTime() < Date.now()) return null;
- return session;
+export function resolveSession(token) {
+  if (!token) return null;
+
+  if (typeof token === 'string' && token.startsWith('aura_adm.')) {
+    const parts = token.split('.');
+    if (parts.length === 5) {
+      const [, adminId, expStr, nonce, sig] = parts;
+      const payload = adminId + '.' + expStr + '.' + nonce;
+      const expectedSig = crypto.createHmac('sha256', getAdminSignKey()).update(payload).digest('base64url');
+      if (constantTimeEqual(sig, expectedSig)) {
+        const exp = Number(expStr);
+        if (Number.isFinite(exp) && exp > Date.now()) {
+          const admin = db().adminUsers.find((entry) => entry.id === adminId) || db().adminUsers[0];
+          if (admin) {
+            return {
+              id: 'ses_' + nonce,
+              adminId: admin.id,
+              username: admin.username,
+              tokenHash: sha256(token),
+              expiresAt: new Date(exp).toISOString(),
+              createdAt: new Date().toISOString(),
+              ip: 'serverless',
+              channel: 'signed-stateless'
+            };
+          }
+        }
+      }
+    }
+  }
+
+  const hash = sha256(token);
+  const session = db().adminSessions.find((entry) => constantTimeEqual(entry.tokenHash, hash));
+  if (!session) return null;
+  if (new Date(session.expiresAt).getTime() < Date.now()) return null;
+  return session;
 }
 
 export function touchSession(sessionId) {
