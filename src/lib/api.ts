@@ -264,6 +264,7 @@ export const adminApi = {
     const query = new URLSearchParams(Object.entries(params).filter(([, value]) => value) as any).toString();
     return adminRequest<{ movements: any[] }>(`/stock/movements${query ? `?${query}` : ''}`);
   },
+  clearStock: () => adminRequest<{ ok: boolean; message: string }>('/stock/clear', { method: 'POST' }),
   moveStock: (body: { productId: string; variantKey: string; type: 'entrada' | 'saida'; quantity: number; reason: string; note?: string }) =>
     adminRequest<{ movement: any }>('/stock/move', { method: 'POST', body: JSON.stringify(body) }),
 
@@ -278,6 +279,11 @@ export const adminApi = {
   carts: (status?: string) => adminRequest<{ carts: any[] }>(`/carts${status ? `?status=${status}` : ''}`),
   contactCart: (id: string) => adminRequest<{ cart: any }>(`/carts/${id}/contacted`, { method: 'POST' }),
 
+  updateAdminPath: (body: { newPath: string; currentPassword: string }) =>
+    adminRequest<{ ok: boolean; newPath: string }>('/security/update-path', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    }),
   customers: (search = '') => adminRequest<{ customers: any[] }>(`/customers${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   customer: (id: string) => adminRequest<{ customer: any }>(`/customers/${id}`),
   reviews: () => adminRequest<{ reviews: any[] }>('/reviews'),

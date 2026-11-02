@@ -46,9 +46,15 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
 
   const reviews = getProductReviews(product.id);
 
+  const colors = useMemo(() => Array.isArray(product.colors) && product.colors.length > 0 ? product.colors : [{ name: 'Padrão', hex: '#FAD2E1' }], [product.colors]);
+  const sizes = useMemo(() => Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : ['M'], [product.sizes]);
+  const images = useMemo(() => Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : ['https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80'], [product.images]);
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] || { name: 'Padrão', hex: '#FAD2E1' });
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'M');
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'detalhes' | 'cuidados' | 'avaliacoes'>('detalhes');
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -90,8 +96,8 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
   }, [customerUser, orders, product.id]);
 
   const isWished = isInWishlist(product.id);
-  const variantKey = `${selectedSize}-${selectedColor.name}`;
-  const currentStock = product.inventory[variantKey] ?? 0;
+  const variantKey = `${selectedSize}-${selectedColor?.name || 'Padrão'}`;
+  const currentStock = (product.inventory && product.inventory[variantKey]) ?? 0;
 
   // Carrega as avaliações reais deste produto
   useEffect(() => {
@@ -215,7 +221,7 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
               {/* Main Image */}
               <div className="relative aspect-[3/4] rounded-[26px] overflow-hidden bg-[#FAF3F5] border border-rose-100/90 shadow-sm group">
                 <img
-                  src={product.images[activeImageIndex] || product.images[0]}
+                  src={images[activeImageIndex] || images[0]}
                   alt={product.name}
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
@@ -242,9 +248,9 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
               </div>
 
               {/* Thumbnails */}
-              {product.images.length > 1 && (
+              {images.length > 1 && (
                 <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
-                  {product.images.map((img, idx) => (
+                  {images.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
@@ -379,7 +385,7 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                   <span>Cor selecionada: <strong className="text-[#DC7898]">{selectedColor.name}</strong></span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {product.colors.map((c) => (
+                  {colors.map((c) => (
                     <button
                       key={c.name}
                       onClick={() => setSelectedColor(c)}
@@ -474,8 +480,8 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2.5">
-                  {product.sizes.map((sz) => {
-                    const vStock = product.inventory[`${sz}-${selectedColor.name}`] ?? 5;
+                  {sizes.map((sz) => {
+                    const vStock = (product.inventory && product.inventory[`${sz}-${selectedColor.name}`]) ?? 0;
                     const isOutOfStock = vStock <= 0;
                     const isRecommended = recommendedFit?.recommendedSize === sz;
 

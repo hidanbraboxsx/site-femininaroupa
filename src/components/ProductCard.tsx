@@ -12,7 +12,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { setSelectedProductDetail, isInWishlist, toggleWishlist } = useStore();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
-  const activeColor = product.colors[selectedColorIndex] || product.colors[0];
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const images = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : ['https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80'];
+  const activeColor = colors[selectedColorIndex] || colors[0];
 
   // Calculate discount percentage if compareAtPrice is present
   const discountPercent = product.compareAtPrice && product.compareAtPrice > product.price
@@ -32,7 +36,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* 1. Image Container with generous rounded corners */}
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] sm:rounded-[26px] bg-[#F7EAEB]/80 shadow-xs group-hover:shadow-lg transition-all duration-500">
         <img
-          src={product.images[0]}
+          src={images[0]}
           alt={product.name}
           className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
@@ -84,7 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Color Swatch Dots */}
         <div className="flex items-center justify-center gap-1 sm:gap-1.5 my-1 sm:my-1.5 max-w-full overflow-hidden">
-          {product.colors.map((color, idx) => (
+          {colors.map((color, idx) => (
             <button
               key={color.name}
               type="button"

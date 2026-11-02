@@ -216,6 +216,27 @@ router.get('/stock', (req, res) => {
   res.json({ ok: true, ...stockOverview() });
 });
 
+
+router.post('/stock/clear', (req, res) => {
+  commit((data) => {
+    for (const p of data.products) {
+      if (p.inventory) {
+        for (const k of Object.keys(p.inventory)) {
+          p.inventory[k] = 0;
+        }
+      }
+    }
+    data.auditLog.unshift({
+      id: nextId('aud'),
+      at: nowIso(),
+      actor: req.adminSession?.username || 'admin',
+      action: 'stock.cleared',
+      detail: 'Saldos de estoque zerados para início de contagem real.'
+    });
+  });
+  res.json({ ok: true, message: 'Estoque zerado com sucesso.' });
+});
+
 router.get('/stock/movements', (req, res) => {
   res.json({
     ok: true,
@@ -412,6 +433,17 @@ router.get('/orders/:id/verify-seal', (req, res) => {
   if (!order) throw new HttpError(404, 'Pedido não encontrado.', 'not_found');
   res.json({ ok: true, orderId: order.id, ...verifySaleOrder(order) });
 });
+
+
+router.post('/security/update-path', asyncHandler(async (req, res) => {
+  const { newPath, currentPassword } = req.body || {};
+  const result = updateAdminPath({
+    session: req.adminSession,
+    currentPassword,
+    newPath
+  });
+  res.json({ ok: true, ...result });
+}));
 
 router.get('/security/sessions', (req, res) => {
   res.json({ ok: true, sessions: listSessions() });

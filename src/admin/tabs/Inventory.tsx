@@ -134,7 +134,33 @@ export function StockTab({ liveKey }: { liveKey: number }) {
         <SectionTitle
           title="Inventário por variação"
           subtitle="cada lançamento gera movimento auditável e alerta no Telegram"
-          action={<Button size="sm" variant="primary" icon={<Plus className="h-3.5 w-3.5" />} onClick={() => openMove(products[0]?.id || '', Object.keys(products[0]?.inventory || {})[0] || '', 'entrada')}>Novo movimento</Button>}
+          action={
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                icon={<Trash2 className="h-3.5 w-3.5 text-stone-400" />}
+                onClick={async () => {
+                  if (!window.confirm('Deseja zerar os saldos de estoque para começar a contagem real física do zero?')) return;
+                  const res = await run(async () => {
+                    await adminApi.clearStock();
+                  });
+                  toast.push(res.ok ? 'Estoque zerado para contagem 100% real.' : 'Falha ao zerar.', res.ok ? 'success' : 'error');
+                  await Promise.all([reload(), movements.reload()]);
+                }}
+              >
+                Zerar Estoque Real
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Plus className="h-3.5 w-3.5" />}
+                onClick={() => openMove(products[0]?.id || '', Object.keys(products[0]?.inventory || {})[0] || '', 'entrada')}
+              >
+                Novo movimento
+              </Button>
+            </div>
+          }
         />
         {products.length === 0 ? (
           <EmptyState title="Nenhum produto cadastrado" description="Cadastre produtos na aba Catálogo para gerenciar o estoque." />
@@ -296,7 +322,7 @@ const EMPTY_PRODUCT = {
   description: '',
   fabric: '',
   care: '',
-  images: '',
+  images: [] as string[],
   sizes: 'PP, P, M, G, GG',
   colors: 'Rosa (#F7B7CA), Marfim (#FFFBF5)',
   initialStock: '0',
@@ -351,7 +377,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
       description: product.description,
       fabric: product.fabric,
       care: product.care,
-      images: product.images.join(', '),
+      images: Array.isArray(product.images) ? [...product.images] : (product.images ? [product.images] : []),
       sizes: product.sizes.join(', '),
       colors: product.colors.map((color) => `${color.name} (${color.hex})`).join(', '),
       initialStock: '0',
@@ -372,7 +398,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
       description: form.description,
       fabric: form.fabric,
       care: form.care,
-      images: form.images.split(',').map((url: string) => url.trim()).filter(Boolean),
+      images: Array.isArray(form.images) ? form.images.filter(Boolean) : (form.images ? [form.images] : []),
       sizes: form.sizes.split(',').map((size: string) => size.trim()).filter(Boolean),
       colors: parseColors(form.colors),
       initialStock: Number(form.initialStock),
@@ -398,7 +424,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
     toast.push(result.ok ? 'Produto removido.' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
-  const previewPhotos = form.images ? form.images.split(',').map((u: string) => u.trim()).filter(Boolean) : [];
+  const previewPhotos = Array.isArray(form.images) ? form.images : (form.images ? [form.images] : []);
   const previewColors = parseColors(form.colors || '');
   const previewSizes = form.sizes ? form.sizes.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
@@ -774,8 +800,8 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                 value=""
                 onChange={(val) => {
                   if (!val) return;
-                  const current = form.images ? form.images.split(',').map((u: string) => u.trim()).filter(Boolean) : [];
-                  setForm({ ...form, images: [...current, val].join(', ') });
+                  const current = Array.isArray(form.images) ? form.images : [];
+                  setForm({ ...form, images: [...current, val] });
                   toast.push('Foto anexada!', 'success');
                 }}
               />
@@ -790,9 +816,8 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                         <button
                           type="button"
                           onClick={() => {
-                            const list = [...previewPhotos];
-                            list.splice(idx, 1);
-                            setForm({ ...form, images: list.join(', ') });
+                            const list = previewPhotos.filter((_: string, i: number) => i !== idx);
+                            setForm({ ...form, images: list });
                           }}
                           className="absolute top-1 right-1 rounded-full bg-red-600 text-white p-1 hover:bg-red-500 shadow-md transition-colors"
                           title="Remover foto"

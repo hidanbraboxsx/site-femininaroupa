@@ -238,8 +238,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [payload, setPayload] = useState<StorePayload | null>(null);
 
   const [reviews, setReviews] = useState<Record<string, Review[]>>({});
-  const [cart, setCart] = useState<CartItem[]>(() => readLocal<CartItem[]>(CART_KEY, []));
-  const [wishlist, setWishlist] = useState<string[]>(() => readLocal<string[]>(WISHLIST_KEY, []));
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    const val = readLocal<CartItem[]>(CART_KEY, []);
+    return Array.isArray(val) ? val : [];
+  });
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    const val = readLocal<string[]>(WISHLIST_KEY, []);
+    return Array.isArray(val) ? val : [];
+  });
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -355,14 +361,15 @@ useEffect(() => {
   // Carrega e mescla a lista de peças salvas do cliente autenticado
   useEffect(() => {
     if (customerUser?.wishlist && Array.isArray(customerUser.wishlist) && customerUser.wishlist.length > 0) {
-      setWishlist((prev) => Array.from(new Set([...prev, ...customerUser.wishlist!])));
+      setWishlist((prev) => Array.from(new Set([...(Array.isArray(prev) ? prev : []), ...customerUser.wishlist!])));
     }
   }, [customerUser?.id]);
 
   useEffect(() => {
-    writeLocal(WISHLIST_KEY, wishlist);
+    const safeWishlist = Array.isArray(wishlist) ? wishlist : [];
+    writeLocal(WISHLIST_KEY, safeWishlist);
     if (customerUser && customerToken.get()) {
-      shopApi.saveWishlist(wishlist).catch(() => {});
+      shopApi.saveWishlist(safeWishlist).catch(() => {});
     }
   }, [wishlist, customerUser]);
 
@@ -631,10 +638,15 @@ useEffect(() => {
   /* ------------------------------ Wishlist ------------------------------ */
 
   const toggleWishlist = useCallback((productId: string) => {
-    setWishlist((prev) => (prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]));
+    setWishlist((prev) => {
+      const arr = Array.isArray(prev) ? prev : [];
+      return arr.includes(productId) ? arr.filter((id) => id !== productId) : [...arr, productId];
+    });
   }, []);
 
-  const isInWishlist = useCallback((productId: string) => wishlist.includes(productId), [wishlist]);
+  const isInWishlist = useCallback((productId: string) => {
+    return Array.isArray(wishlist) && wishlist.includes(productId);
+  }, [wishlist]);
 
   /* ------------------------------- Pedidos ------------------------------- */
 

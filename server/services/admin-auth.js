@@ -599,3 +599,31 @@ function escape(text) {
 }
 
 export { TelegramError };
+
+
+export function updateAdminPath({ session, currentPassword, newPath }) {
+  const admin = db().adminUsers.find((entry) => entry.id === session.adminId);
+  if (!admin) throw new HttpError(401, 'Administradora não encontrada.', 'invalid_admin');
+  assert(verifyPassword(String(currentPassword || ''), admin.credentials), 401, 'Senha de administradora incorreta.', 'invalid_password');
+
+  const cleanPath = String(newPath || '').trim().replace(/^\/+|\/+$/g, '');
+  assert(cleanPath.length >= 4, 400, 'O caminho deve conter pelo menos 4 caracteres.', 'invalid_path');
+  assert(/^[a-zA-Z0-9_-]+$/.test(cleanPath), 400, 'O caminho só pode conter letras, números, hífens e sublinhados.', 'invalid_path_format');
+
+  commit((data) => {
+    data.meta = data.meta || {};
+    data.meta.adminPath = cleanPath;
+    data.meta.pathRotatedAt = new Date().toISOString();
+    data.auditLog.unshift({
+      id: nextId('aud'),
+      at: new Date().toISOString(),
+      actor: admin.username,
+      action: 'admin.path.updated',
+      detail: `Caminho do painel alterado para /${cleanPath}`,
+      ip: session.ip
+    });
+  });
+
+  config.adminPath = cleanPath;
+  return { ok: true, newPath: `/${cleanPath}` };
+}

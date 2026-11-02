@@ -129,7 +129,7 @@ export function stockOverview() {
  const costValue = total * Number(product.costPrice || 0);
  const saleValue = total * Number(product.price || 0);
  const critical = Object.entries(product.inventory || {})
- .filter(([, value]) => Number(value) <= config.lowStockThreshold)
+ .filter(([, value]) => Number(value) > 0 && Number(value) <= config.lowStockThreshold)
  .map(([key, value]) => ({ variantKey: key, stock: Number(value) }));
  return {
  id: product.id,

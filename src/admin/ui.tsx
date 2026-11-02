@@ -348,6 +348,7 @@ export function ImageUploader({
   compact?: boolean;
 }) {
   const [dragOver, setDragOver] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFiles = (files: FileList | null) => {
@@ -361,6 +362,7 @@ export function ImageUploader({
       }
     };
     reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -382,6 +384,13 @@ export function ImageUploader({
         }
       }
     }
+  };
+
+  const handleUrlSubmit = () => {
+    const clean = urlInput.trim();
+    if (!clean) return;
+    onChange(clean);
+    setUrlInput('');
   };
 
   return (
@@ -454,8 +463,14 @@ export function ImageUploader({
 
         <div className="mt-2.5 w-full flex gap-1.5">
           <Input
-            value={value.startsWith('data:') ? '[Imagem Carregada do Computador/Print]' : value}
-            onChange={(e) => onChange(e.target.value)}
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleUrlSubmit();
+              }
+            }}
             placeholder="Ou cole a URL da imagem aqui (https://...)"
             className="text-xs font-mono"
           />
@@ -463,9 +478,18 @@ export function ImageUploader({
             type="button"
             size="sm"
             variant="outline"
+            onClick={handleUrlSubmit}
+            disabled={!urlInput.trim()}
+          >
+            Anexar Link
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="primary"
             onClick={() => fileInputRef.current?.click()}
           >
-            Anexar
+            Arquivo
           </Button>
         </div>
       </div>

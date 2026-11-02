@@ -33,10 +33,11 @@ export const ProductGrid: React.FC = () => {
   ];
 
   // Filtering
-  const filteredProducts = products.filter((prod) => {
+  const filteredProducts = (Array.isArray(products) ? products : []).filter((prod) => {
+    if (!prod) return false;
     // Novidades filter
     if (selectedCategory === 'Novidades') {
-      const isNew = prod.isNewArrival === true || prod.tags?.some(t => t.toLowerCase().includes('novidade') || t.toLowerCase().includes('primavera'));
+      const isNew = prod.isNewArrival === true || (Array.isArray(prod.tags) && prod.tags.some(t => typeof t === 'string' && (t.toLowerCase().includes('novidade') || t.toLowerCase().includes('primavera'))));
       if (!isNew) return false;
     } else if (selectedCategory !== 'Todos' && prod.category !== selectedCategory) {
       return false;
@@ -44,14 +45,14 @@ export const ProductGrid: React.FC = () => {
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      const matchName = prod.name.toLowerCase().includes(q);
-      const matchDesc = prod.description.toLowerCase().includes(q);
-      const matchCat = prod.category.toLowerCase().includes(q);
+      const matchName = typeof prod.name === 'string' && prod.name.toLowerCase().includes(q);
+      const matchDesc = typeof prod.description === 'string' && prod.description.toLowerCase().includes(q);
+      const matchCat = typeof prod.category === 'string' && prod.category.toLowerCase().includes(q);
       if (!matchName && !matchDesc && !matchCat) return false;
     }
     // Size
     if (selectedSizeFilter !== 'Todos') {
-      const hasSize = prod.sizes.some((s) => s.includes(selectedSizeFilter));
+      const hasSize = Array.isArray(prod.sizes) && prod.sizes.some((s) => typeof s === 'string' && s.includes(selectedSizeFilter));
       if (!hasSize) return false;
     }
     return true;

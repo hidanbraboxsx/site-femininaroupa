@@ -66,6 +66,9 @@ export function FinanceTab({ liveKey }: { liveKey: number }) {
   const { data, loading, reload } = useLoad(() => adminApi.overview(), [liveKey]);
   const cashflow = useLoad(() => adminApi.cashflow({ limit: 100 }), [liveKey]);
   const { busy, run } = useAction();
+  const [editRouteModal, setEditRouteModal] = useState(false);
+  const [newAdminPath, setNewAdminPath] = useState('');
+  const [currentPass, setCurrentPass] = useState('');
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ type: 'saida' as 'entrada' | 'saida', title: '', category: 'fornecedor', amount: '', notes: '' });
@@ -348,6 +351,10 @@ export function SecurityTab({ liveKey }: { liveKey: number }) {
   const [form, setForm] = useState({ currentPassword: '', code: '', newUsername: '', newPassword: '', rotateTotp: false, rotatePath: false });
   const [result, setResult] = useState<any>(null);
 
+  const [editRouteModal, setEditRouteModal] = useState(false);
+  const [newAdminPath, setNewAdminPath] = useState('');
+  const [routeConfirmPassword, setRouteConfirmPassword] = useState('');
+
   async function submit() {
     const response = await run(async () => {
       const value = await adminApi.changeCredentials(form);
@@ -364,7 +371,22 @@ export function SecurityTab({ liveKey }: { liveKey: number }) {
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
-          <SectionTitle title="Caminho do painel" subtitle="derivado por HMAC-SHA256" />
+          <SectionTitle
+            title="Caminho do painel"
+            subtitle="derivado por HMAC-SHA256"
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setNewAdminPath(data?.path?.path?.replace(/^\//, '') || 'janaadmin1978');
+                  setEditRouteModal(true);
+                }}
+              >
+                Alterar Acesso
+              </Button>
+            }
+          />
           <p className="break-all font-mono-admin text-xs text-rose-300">{data?.path?.path}</p>
           <p className="mt-2 text-[11px] text-stone-500">{data?.path?.length} caracteres · {data?.path?.algorithm}</p>
           <p className="mt-1 text-[11px] text-stone-500">Rotacionado em {formatDate(data?.path?.rotatedAt)}</p>
@@ -516,6 +538,68 @@ export function SecurityTab({ liveKey }: { liveKey: number }) {
           </div>
         ) : null}
       </Card>
+
+      <Modal
+        open={editRouteModal}
+        onClose={() => setEditRouteModal(false)}
+        title="Alterar Caminho de Acesso ao Painel"
+        subtitle="Defina um novo caminho seguro para o painel admin. Exige confirmação de senha."
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setEditRouteModal(false)}>Cancelar</Button>
+            <Button
+              variant="primary"
+              loading={busy}
+              disabled={!newAdminPath.trim() || !routeConfirmPassword}
+              onClick={async () => {
+                const clean = newAdminPath.trim().replace(/^\//, '');
+                if (!clean) return;
+                const res = await run(async () => {
+                  await adminApi.updateAdminPath({ newPath: clean, currentPassword: routeConfirmPassword });
+                });
+                if (res.ok) {
+                  toast.push(`Caminho alterado com sucesso para /${clean}`, 'success');
+                  setEditRouteModal(false);
+                  setRouteConfirmPassword('');
+                  await reload();
+                  setTimeout(() => {
+                    window.location.pathname = `/${clean}/`;
+                  }, 1200);
+                } else {
+                  toast.push((res as any).error || 'Falha ao alterar caminho.', 'error');
+                }
+              }}
+            >
+              Confirmar Alteração
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Field label="Novo Caminho / Rota" hint="Exemplo: painel-secreto, gerencia2026, etc. Sem barras.">
+            <div className="flex items-center gap-2">
+              <span className="text-stone-500 font-mono text-xs">/</span>
+              <Input
+                value={newAdminPath}
+                onChange={(e) => setNewAdminPath(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
+                placeholder="novo-caminho-secreto"
+                className="font-mono"
+              />
+            </div>
+          </Field>
+          <Field label="Senha Atual do Administrador" hint="Necessário para validar que você tem autorização para alterar a rota.">
+            <Input
+              type="password"
+              value={routeConfirmPassword}
+              onChange={(e) => setRouteConfirmPassword(e.target.value)}
+              placeholder="Digite sua senha de acesso"
+            />
+          </Field>
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-[11px] text-amber-200">
+            Atenção: Ao confirmar com sua senha, o endereço do painel será atualizado imediatamente e você será redirecionado para a nova URL.
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -930,12 +1014,64 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                 className="h-11 p-1"
               />
             </Field>
-            <Field label="Fonte dos títulos">
-              <Input
-                value={customization.titleFont || 'Playfair Display'}
-                onChange={(e) => setCustomization({ ...customization, titleFont: e.target.value })}
-              />
-            </Field>
+            <div className="sm:col-span-2 lg:col-span-3 rounded-xl border border-[var(--admin-border)] bg-black/30 p-4 space-y-3">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2">
+                <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">
+                  Estúdio de Tipografia de Luxo
+                </span>
+                <span className="text-[10px] text-stone-400">Preview 100% Real Sincronizado</span>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Selecionar Fonte dos Títulos" hint="Fontes nobres curadas para moda feminina de alto padrão">
+                  <Select
+                    value={customization.titleFont || 'Playfair Display'}
+                    onChange={(e) => {
+                      const selected = e.target.value;
+                      setCustomization({ ...customization, titleFont: selected });
+
+                      // Injeta a Google Font dinamicamente para renderização imediata
+                      const linkId = 'dynamic-custom-google-font';
+                      let link = document.getElementById(linkId) as HTMLLinkElement | null;
+                      if (!link) {
+                        link = document.createElement('link');
+                        link.id = linkId;
+                        link.rel = 'stylesheet';
+                        document.head.appendChild(link);
+                      }
+                      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(selected)}:ital,wght@0,400;0,600;0,700;1,400&display=swap`;
+                    }}
+                  >
+                    <option value="Playfair Display">Playfair Display — Romântica Clássica (Padrão)</option>
+                    <option value="Cormorant Garamond">Cormorant Garamond — Editorial de Alta Costura</option>
+                    <option value="Cinzel">Cinzel — Clássica Imperial & Nobre</option>
+                    <option value="Prata">Prata — Moderna Delicada & Elegante</option>
+                    <option value="Italiana">Italiana — Passarela Milanesa Minimalista</option>
+                    <option value="Montserrat">Montserrat — Clean Contemporânea</option>
+                    <option value="Plus Jakarta Sans">Plus Jakarta Sans — Moderna Geométrica Suave</option>
+                  </Select>
+                </Field>
+
+                {/* Card de Preview da Tipografia em Tempo Real */}
+                <div className="rounded-xl border border-rose-500/20 bg-gradient-to-b from-[#1a1518] to-[#120f11] p-3.5 space-y-1.5 shadow-md">
+                  <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">
+                    Prévia ao Vivo na Loja:
+                  </span>
+                  <p
+                    className="text-base sm:text-lg font-bold text-stone-100 transition-all leading-snug"
+                    style={{ fontFamily: customization.titleFont || 'Playfair Display' }}
+                  >
+                    Vestido Midi em Chiffon de Seda Nobre
+                  </p>
+                  <p className="text-xs font-semibold text-rose-400">
+                    R$ 299,90 <span className="text-[10px] text-stone-400 font-normal">· 3x de R$ 99,96 sem juros</span>
+                  </p>
+                  <p className="text-[11px] text-stone-400 font-light leading-relaxed">
+                    Modelagem fluida que valoriza a silhueta feminina com toque suave e acabamentos artesanais.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <Button
