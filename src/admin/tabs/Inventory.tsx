@@ -190,23 +190,33 @@ export function StockTab({ liveKey }: { liveKey: number }) {
                 </div>
                 <div className="mt-2 space-y-1">
                   {Object.entries(product.inventory).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between rounded-lg bg-black/20 px-2 py-1">
-                      <span className="text-[11px] text-stone-400">{key}</span>
-                      <div className="flex items-center gap-1">
+                    <div key={key} className="flex items-center justify-between gap-1.5 rounded-lg bg-black/20 px-2 py-1 min-w-0">
+                      <span className="text-[11px] text-stone-400 truncate min-w-0 font-medium" title={key}>{key}</span>
+                      <div className="flex items-center gap-0.5 shrink-0">
                         <button
-                          className="rounded px-1.5 text-xs text-stone-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
+                          className="flex h-5 w-5 items-center justify-center rounded text-xs text-stone-400 hover:bg-white/10 hover:text-white disabled:opacity-30 cursor-pointer"
                           disabled={busy || Number(value) <= 0}
                           onClick={() => quickMove(product.id, key, -1)}
+                          title="Diminuir estoque"
                         >
                           −
                         </button>
-                        <span className={cn('w-7 text-center text-xs tabular-nums', Number(value) <= (data?.lowStockThreshold || 3) ? 'text-amber-300' : 'text-stone-200')}>
+                        <span className={cn('w-5 text-center text-xs font-bold tabular-nums', Number(value) <= (data?.lowStockThreshold || 3) ? 'text-amber-300' : 'text-stone-200')}>
                           {String(value)}
                         </span>
-                        <button className="rounded px-1.5 text-xs text-stone-400 hover:bg-white/10 hover:text-white" disabled={busy} onClick={() => quickMove(product.id, key, 1)}>
+                        <button
+                          className="flex h-5 w-5 items-center justify-center rounded text-xs text-stone-400 hover:bg-white/10 hover:text-white cursor-pointer"
+                          disabled={busy}
+                          onClick={() => quickMove(product.id, key, 1)}
+                          title="Aumentar estoque"
+                        >
                           +
                         </button>
-                        <button className="ml-1 rounded px-1 text-[10px] text-stone-500 hover:text-rose-300" onClick={() => openMove(product.id, key, 'entrada')}>
+                        <button
+                          className="ml-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-rose-400/90 hover:text-rose-300 hover:bg-rose-500/10 cursor-pointer transition-colors whitespace-nowrap"
+                          onClick={() => openMove(product.id, key, 'entrada')}
+                          title="Lançar movimento detalhado"
+                        >
                           lançar
                         </button>
                       </div>

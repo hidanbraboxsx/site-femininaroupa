@@ -89,50 +89,54 @@ export function OverviewTab({ liveKey, onNavigate }: { liveKey: number; onNaviga
             }
           />
 
-          <div className="mt-4 rounded-xl border border-white/5 bg-[#0f0f14]/80 p-4">
-            <div className="relative mb-2 flex items-center justify-between text-[10px] text-stone-500 border-b border-white/5 pb-1">
-              <span>{maxRevenue > 1 ? `Pico: ${formatBRL(maxRevenue)}` : 'Meta diária: R$ 500,00'}</span>
-              <span>Baseline: R$ 0,00</span>
+          <div className="mt-4 rounded-xl border border-white/5 bg-[#0f0f14]/80 p-3 sm:p-4">
+            <div className="relative mb-2 flex flex-wrap items-center justify-between gap-1 text-[10px] text-stone-500 border-b border-white/5 pb-1.5">
+              <span>{maxRevenue > 1 ? `Pico: ${formatBRL(maxRevenue)}` : 'Período: últimos 14 dias'}</span>
+              <span>Total confirmado: <strong className="text-stone-300">{formatBRL(metrics.revenue)}</strong></span>
             </div>
 
-            <div className="flex h-36 items-end gap-1.5 pt-4">
-              {metrics.revenueByDay.map((entry: any) => {
-                const heightPct = maxRevenue > 1 ? Math.max(6, (entry.total / maxRevenue) * 100) : 6;
-                const isZero = entry.total <= 0;
-                return (
-                  <div key={entry.day} className="group relative flex flex-1 h-full flex-col items-center justify-end">
-                    <div className="pointer-events-none absolute -top-8 z-20 hidden whitespace-nowrap rounded-lg border border-white/10 bg-black/90 px-2 py-1 text-[11px] font-mono text-stone-200 shadow-xl group-hover:flex flex-col items-center">
-                      <span className="font-bold text-rose-300">{formatBRL(entry.total)}</span>
-                      <span className="text-[9px] text-stone-400">{entry.day.slice(8, 10)}/{entry.day.slice(5, 7)} · {entry.count || 0} pedido(s)</span>
-                    </div>
+            {/* Container responsivo com rolagem horizontal suave no mobile sem cortar */}
+            <div className="overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex h-36 items-end gap-1.5 pt-4 min-w-[500px] sm:min-w-0">
+                {metrics.revenueByDay.map((entry: any) => {
+                  const heightPct = maxRevenue > 1 ? Math.max(6, (entry.total / maxRevenue) * 100) : 6;
+                  const isZero = entry.total <= 0;
+                  return (
+                    <div key={entry.day} className="group relative flex flex-1 h-full flex-col items-center justify-end">
+                      <div className="pointer-events-none absolute -top-8 z-20 hidden whitespace-nowrap rounded-lg border border-white/10 bg-black/90 px-2 py-1 text-[11px] font-mono text-stone-200 shadow-xl group-hover:flex flex-col items-center">
+                        <span className="font-bold text-rose-300">{formatBRL(entry.total)}</span>
+                        <span className="text-[9px] text-stone-400">{entry.day.slice(8, 10)}/{entry.day.slice(5, 7)} · {entry.count || 0} pedido(s)</span>
+                      </div>
 
-                    <div className="relative w-full h-full flex items-end justify-center rounded-t bg-white/[0.02] hover:bg-white/[0.06] transition-colors p-0.5">
-                      <div
-                        className={cn(
-                          'w-full rounded-t transition-all duration-300',
-                          !isZero
-                            ? 'bg-gradient-to-t from-rose-600 via-rose-500 to-pink-400 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
-                            : 'bg-stone-800/80 group-hover:bg-rose-500/30'
-                        )}
-                        style={{ height: `${heightPct}%` }}
-                      />
-                    </div>
+                      <div className="relative w-full h-full flex items-end justify-center rounded-t bg-white/[0.02] hover:bg-white/[0.06] transition-colors p-0.5">
+                        <div
+                          className={cn(
+                            'w-full rounded-t transition-all duration-300',
+                            !isZero
+                              ? 'bg-gradient-to-t from-rose-600 via-rose-500 to-pink-400 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                              : 'bg-stone-800/80 group-hover:bg-rose-500/30'
+                          )}
+                          style={{ height: `${heightPct}%` }}
+                        />
+                      </div>
 
-                    <span className="mt-2 text-[9px] font-mono text-stone-500 group-hover:text-stone-300 transition-colors">
-                      {entry.day.slice(8, 10)}/{entry.day.slice(5, 7)}
-                    </span>
-                  </div>
-                );
-              })}
+                      <span className="mt-2 text-[9px] font-mono text-stone-500 group-hover:text-stone-300 transition-colors whitespace-nowrap">
+                        {entry.day.slice(8, 10)}/{entry.day.slice(5, 7)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
+            {/* Aviso limpo, responsivo sem quebras estranhas no mobile */}
             {metrics.revenue === 0 && (
-              <div className="mt-3 flex items-center justify-between rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-3 py-2 text-[11px] text-stone-400">
+              <div className="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-dashed border-white/10 bg-white/[0.02] p-2.5 sm:px-3 sm:py-2 text-[11px] text-stone-400">
                 <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                  Gateway SyncPay integrado e pronto. Aguardando próximas vendas de clientes.
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>Gateway SyncPay integrado. Aguardando confirmações de pagamento dos leads.</span>
                 </span>
-                <span className="font-mono text-[10px] text-stone-500">Zero dados falsos</span>
+                <span className="self-end sm:self-auto font-mono text-[10px] text-stone-500 whitespace-nowrap">Dados 100% reais</span>
               </div>
             )}
           </div>

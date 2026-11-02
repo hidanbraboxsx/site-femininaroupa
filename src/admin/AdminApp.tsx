@@ -342,6 +342,12 @@ export default function AdminApp() {
 
   useEffect(() => {
     check();
+    const handleUnauthorized = () => {
+      adminToken.set('');
+      setSession(null);
+    };
+    window.addEventListener('aura:admin:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('aura:admin:unauthorized', handleUnauthorized);
   }, [check]);
 
   const logout = useCallback(async () => {

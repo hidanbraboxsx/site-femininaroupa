@@ -225,6 +225,7 @@ router.post('/stock/clear', (req, res) => {
           p.inventory[k] = 0;
         }
       }
+      p.inStock = false;
     }
     data.auditLog.unshift({
       id: nextId('aud'),

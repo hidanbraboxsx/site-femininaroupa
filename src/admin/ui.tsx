@@ -68,12 +68,12 @@ export function SectionTitle({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-4 flex items-start justify-between gap-4">
-      <div>
-        <h2 className="text-lg font-semibold text-[var(--admin-text-main)]">{title}</h2>
-        {subtitle ? <p className="mt-1 text-xs text-[var(--admin-text-muted)]">{subtitle}</p> : null}
+    <div className="mb-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+      <div className="min-w-0">
+        <h2 className="text-base sm:text-lg font-semibold text-[var(--admin-text-main)] truncate">{title}</h2>
+        {subtitle ? <p className="mt-1 text-xs text-[var(--admin-text-muted)] leading-relaxed">{subtitle}</p> : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0 flex items-center gap-2 flex-wrap">{action}</div> : null}
     </div>
   );
 }

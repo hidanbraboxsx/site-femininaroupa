@@ -208,13 +208,23 @@ export const adminToken = {
 
 async function adminRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = adminToken.get();
-  return request<T>(`${adminBaseUrl()}${path}`, {
-    ...options,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {})
+  try {
+    return await request<T>(`${adminBaseUrl()}${path}`, {
+      ...options,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {})
+      }
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      adminToken.set('');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('aura:admin:unauthorized'));
+      }
     }
-  });
+    throw error;
+  }
 }
 
 export const adminApi = {
