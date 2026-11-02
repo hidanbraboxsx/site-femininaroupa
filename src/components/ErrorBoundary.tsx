@@ -2,6 +2,7 @@ import React from 'react';
 
 interface State {
   error: Error | null;
+  componentStack?: string;
 }
 
 /**
@@ -18,14 +19,18 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('[Aura Rosa] Falha na interface:', error, info.componentStack);
+    this.setState({ componentStack: info.componentStack || '' });
   }
 
   render() {
     if (!this.state.error) return this.props.children;
 
+    const errorMsg = this.state.error.message || String(this.state.error);
+    const stack = this.state.componentStack || this.state.error.stack || '';
+
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FFF9FA] px-6">
-        <div className="w-full max-w-md rounded-3xl border border-rose-200 bg-white p-7 text-center shadow-lg">
+      <div className="flex min-h-screen items-center justify-center bg-[#FFF9FA] px-4 py-8">
+        <div className="w-full max-w-lg rounded-3xl border border-rose-200 bg-white p-7 text-center shadow-lg">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-[#C66382]">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <path d="M12 8.5v4.2M12 16.2v.1" />
@@ -36,21 +41,20 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
           <p className="mt-2 text-xs leading-relaxed text-stone-500">
             Encontramos um erro ao exibir esta parte da loja. Seus dados e seu carrinho estão preservados.
           </p>
-          {this.state.error && (
-            <p className="mt-2 text-[10px] text-stone-400 font-mono break-words bg-stone-50 p-2 rounded-lg border border-stone-200 text-left">
-              {this.state.error.message || String(this.state.error)}
-            </p>
-          )}
+          <div className="mt-3 p-3 text-[11px] text-stone-600 font-mono break-words bg-stone-50 rounded-xl border border-stone-200 text-left overflow-x-auto max-h-52 whitespace-pre-wrap">
+            <span className="font-bold text-red-600 block mb-1">{errorMsg}</span>
+            {stack && <span className="text-[10px] text-stone-400 block">{stack}</span>}
+          </div>
           <div className="mt-5 flex flex-col gap-2">
             <button
-              onClick={() => this.setState({ error: null })}
-              className="rounded-full bg-[#DC7898] px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#C66382]"
+              onClick={() => this.setState({ error: null, componentStack: undefined })}
+              className="rounded-full bg-[#DC7898] px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#C66382] cursor-pointer"
             >
               Tentar novamente
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="rounded-full border border-rose-200 px-5 py-2.5 text-xs font-semibold text-stone-700 transition-colors hover:border-rose-300"
+              className="rounded-full border border-rose-200 px-5 py-2.5 text-xs font-semibold text-stone-700 transition-colors hover:border-rose-300 cursor-pointer"
             >
               Recarregar a página
             </button>

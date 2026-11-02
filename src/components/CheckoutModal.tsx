@@ -112,7 +112,34 @@ export const CheckoutModal: React.FC = () => {
     }
   }, [step, paymentMethod, pixTimeLeft]);
 
-  if (!isCheckoutOpen) return null;
+  // Monitoramento inteligente em tempo real: verifica baixa do Pix via SyncPay
+  useEffect(() => {
+    if (!isCheckoutOpen || step !== 4 || !placedOrder || placedOrder.paymentStatus === 'confirmado') return;
+
+    let active = true;
+    const interval = setInterval(async () => {
+      try {
+        const res = await shopApi.order(placedOrder.id, placedOrder.lead?.email);
+        if (!active || !res?.order) return;
+        if (res.order.paymentStatus === 'confirmado') {
+          setPlacedOrder((prev) => (prev ? { ...prev, ...res.order } : res.order));
+          try {
+            confetti({
+              particleCount: 150,
+              spread: 100,
+              origin: { y: 0.5 },
+              colors: ['#10B981', '#059669', '#34D399', '#6EE7B7']
+            });
+          } catch {}
+        }
+      } catch {}
+    }, 3000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isCheckoutOpen, step, placedOrder?.id, placedOrder?.paymentStatus]);
 
   // Validation Step 1: Lead Info
   const validateStep1 = () => {
@@ -255,34 +282,7 @@ export const CheckoutModal: React.FC = () => {
     setTimeout(() => setPixCopied(false), 3000);
   };
 
-  // Monitoramento inteligente em tempo real: verifica baixa do Pix via SyncPay
-  useEffect(() => {
-    if (step !== 4 || !placedOrder || placedOrder.paymentStatus === 'confirmado') return;
 
-    let active = true;
-    const interval = setInterval(async () => {
-      try {
-        const res = await shopApi.order(placedOrder.id, placedOrder.lead?.email);
-        if (!active || !res?.order) return;
-        if (res.order.paymentStatus === 'confirmado') {
-          setPlacedOrder((prev) => (prev ? { ...prev, ...res.order } : res.order));
-          try {
-            confetti({
-              particleCount: 150,
-              spread: 100,
-              origin: { y: 0.5 },
-              colors: ['#10B981', '#059669', '#34D399', '#6EE7B7']
-            });
-          } catch {}
-        }
-      } catch {}
-    }, 3000);
-
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [step, placedOrder?.id, placedOrder?.paymentStatus]);
 
   const minutes = Math.floor(pixTimeLeft / 60);
   const seconds = pixTimeLeft % 60;

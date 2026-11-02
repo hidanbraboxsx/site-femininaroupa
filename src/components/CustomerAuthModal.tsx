@@ -196,8 +196,6 @@ export const CustomerAuthModal: React.FC = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
 
-  if (!isAuthOpen) return null;
-
   // Pedidos reais desta cliente (a API já filtra pelo e-mail autenticado)
   const customerOrders = orders;
 
