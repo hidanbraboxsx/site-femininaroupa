@@ -27,7 +27,8 @@ export const Header: React.FC = () => {
     setSearchQuery,
     customerUser,
     shippingConfig,
-    openProvadorVirtual
+    openProvadorVirtual,
+    activeCategories
   } = useStore();
 
   const [isSupportOpen, setIsSupportOpen] = useState(false);
@@ -39,7 +40,7 @@ export const Header: React.FC = () => {
     // A busca é local; nenhuma rota administrativa é exposta na loja.
   };
 
-  const categories = [
+  const categories = activeCategories || [
     'Todos',
     'Vestidos',
     'Blusas & Camisas',

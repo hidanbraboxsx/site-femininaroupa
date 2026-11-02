@@ -25,7 +25,7 @@ import { changeStatus, deleteOrder, getOrder, listOrders, markPaid, setTrackingC
 import { listMovements, moveStock, stockOverview } from '../services/stock.js';
 import { addCashflowEntry, clearTestData, dashboardMetrics, deleteCashflowEntry, listCashflow } from '../services/finance.js';
 import { listCarts, markCartContacted } from '../services/carts.js';
-import { listCustomers, customerProfile } from '../services/customers.js';
+import { listCustomers, customerProfile, deleteCustomer, clearTestCustomers } from '../services/customers.js';
 import {
   createCoupon,
   deleteCoupon,
@@ -282,6 +282,14 @@ router.get('/customers/:id', (req, res) => {
   const customer = customerProfile(req.params.id);
   if (!customer) throw new HttpError(404, 'Cliente não encontrada.', 'not_found');
   res.json({ ok: true, customer });
+
+router.delete('/customers/:id', (req, res) => {
+  res.json(deleteCustomer(req.params.id, { actor: `admin:${req.adminSession.username}` }));
+});
+
+router.post('/customers/clear-test', (req, res) => {
+  res.json(clearTestCustomers({ actor: `admin:${req.adminSession.username}` }));
+});
 });
 
 router.get('/reviews', (req, res) => {

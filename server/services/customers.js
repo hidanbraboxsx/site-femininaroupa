@@ -4,7 +4,7 @@
 import { config } from '../config.js';
 import { commit, db, nextId } from '../lib/db.js';
 import { HttpError, assert } from '../lib/errors.js';
-import { brl, isValidCPF, isValidEmail, normalizeEmail, nowIso, onlyDigits } from '../lib/format.js';
+import { brl, isValidCPF, isValidEmail, isValidFullName, isValidPhoneBR, normalizeEmail, nowIso, onlyDigits } from '../lib/format.js';
 import { constantTimeEqual, hashPassword, randomToken, sha256, verifyPassword } from '../lib/crypto.js';
 import { notify } from './notify.js';
 
@@ -46,10 +46,10 @@ export function registerCustomer(input) {
  const phone = String(input.phone || '').trim();
  const password = String(input.password || '');
 
- assert(fullName.split(/\s+/).length >= 2, 400, 'Informe seu nome completo.', 'invalid_name');
+ assert(isValidFullName(fullName), 400, 'Informe seu nome e sobrenome completo com dados reais.', 'invalid_name');
  assert(isValidEmail(email), 400, 'E-mail inválido.', 'invalid_email');
  assert(isValidCPF(cpf), 400, 'CPF inválido.', 'invalid_cpf');
- assert(onlyDigits(phone).length >= 10, 400, 'WhatsApp inválido.', 'invalid_phone');
+ assert(isValidPhoneBR(phone), 400, 'Telefone WhatsApp inválido. Informe DDD válido e celular.', 'invalid_phone');
  assert(password.length >= 8, 400, 'A senha deve ter pelo menos 8 caracteres.', 'weak_password');
 
  const data = db();
@@ -150,7 +150,7 @@ export function updateCustomerProfile(customerId, input) {
   const cpf = input.cpf ? String(input.cpf).trim() : customer.cpf;
 
   if (input.fullName) {
-    assert(fullName.split(/\s+/).length >= 2, 400, 'Informe seu nome completo.', 'invalid_name');
+    assert(isValidFullName(fullName), 400, 'Informe seu nome e sobrenome completo com dados reais.', 'invalid_name');
   }
   if (input.phone) {
     assert(onlyDigits(phone).length >= 10, 400, 'WhatsApp inválido (informe DDD + número).', 'invalid_phone');
@@ -212,6 +212,39 @@ export function updateCustomerProfile(customerId, input) {
   });
 
   return publicCustomer(updated);
+}
+
+export function deleteCustomer(customerId, { actor = 'admin' } = {}) {
+  return commit((store) => {
+    const idx = store.customers.findIndex((c) => c.id === customerId);
+    if (idx === -1) throw new HttpError(404, 'Cliente não encontrado.', 'not_found');
+    const [removed] = store.customers.splice(idx, 1);
+    store.customerSessions = (store.customerSessions || []).filter((s) => s.customerId !== customerId);
+    store.auditLog.unshift({
+      id: nextId('aud'),
+      at: nowIso(),
+      actor,
+      action: 'customer.deleted',
+      detail: `Cliente ${removed.fullName} (${removed.email}) removido.`
+    });
+    return { ok: true, deleted: removed.id };
+  });
+}
+
+export function clearTestCustomers({ actor = 'admin' } = {}) {
+  return commit((store) => {
+    const before = store.customers.length;
+    store.customers = store.customers.filter((c) => !c.email.includes('@teste.com.br') && !c.email.includes('teste'));
+    const count = before - store.customers.length;
+    store.auditLog.unshift({
+      id: nextId('aud'),
+      at: nowIso(),
+      actor,
+      action: 'customers.test_cleared',
+      detail: `${count} cadastro(s) de teste removidos.`
+    });
+    return { ok: true, removedCount: count };
+  });
 }
 
 export function customerProfile(customerId) {

@@ -26,6 +26,13 @@ export interface StoreLocation {
   state: string;
 }
 
+export interface CategorySetting {
+  id: string;
+  name: string;
+  active: boolean;
+  isCollection?: boolean;
+}
+
 export interface StoreCustomization {
   companyName: string;
   pageTitle: string;
@@ -50,6 +57,7 @@ export interface StoreCustomization {
   titleFont: string;
   bodyFont: string;
   socials: Record<string, { platform: string; handle: string; url: string }>;
+  categories?: CategorySetting[];
 }
 
 interface StoreContextType {
@@ -125,6 +133,7 @@ interface StoreContextType {
   }) => Promise<{ ok: boolean; error?: string }>;
   setCustomerUser: React.Dispatch<React.SetStateAction<CustomerSession | null>>;
 
+  activeCategories: string[];
   selectedCategory: string;
   setSelectedCategory: (value: string) => void;
   searchQuery: string;
@@ -224,7 +233,17 @@ const FALLBACK_CUSTOMIZATION: StoreCustomization = {
   palettePreset: 'flor_de_seda',
   titleFont: 'Playfair Display',
   bodyFont: 'Plus Jakarta Sans',
-  socials: {}
+  socials: {},
+  categories: [
+    { id: 'cat-novidades', name: 'Novidades', active: true, isCollection: true },
+    { id: 'cat-vestidos', name: 'Vestidos', active: true, isCollection: false },
+    { id: 'cat-blusas', name: 'Blusas & Camisas', active: true, isCollection: false },
+    { id: 'cat-calcas', name: 'Calças & Jeans', active: true, isCollection: false },
+    { id: 'cat-conjuntos', name: 'Conjuntos', active: true, isCollection: false },
+    { id: 'cat-alfaiataria', name: 'Alfaiataria', active: true, isCollection: false },
+    { id: 'cat-tricots', name: 'Tricots', active: true, isCollection: false },
+    { id: 'cat-saias', name: 'Saias', active: true, isCollection: false }
+  ]
 };
 
 /* ------------------------------------------------------------------ *
@@ -407,6 +426,14 @@ useEffect(() => {
     const source = (payload?.settings?.customization || {}) as Partial<StoreCustomization>;
     return { ...FALLBACK_CUSTOMIZATION, ...source } as StoreCustomization;
   }, [payload]);
+
+  const activeCategories = useMemo(() => {
+    const list = customization?.categories;
+    if (Array.isArray(list) && list.length > 0) {
+      return ['Todos', ...list.filter((c) => c.active).map((c) => c.name)];
+    }
+    return ['Todos', 'Novidades', 'Vestidos', 'Blusas & Camisas', 'Calças & Jeans', 'Conjuntos', 'Alfaiataria', 'Tricots', 'Saias'];
+  }, [customization?.categories]);
 
   useEffect(() => {
     try {
@@ -772,6 +799,7 @@ useEffect(() => {
     updateCustomerProfile,
     setCustomerUser,
 
+    activeCategories,
     selectedCategory,
     setSelectedCategory,
     searchQuery,

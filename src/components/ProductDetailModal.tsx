@@ -226,15 +226,23 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Wishlist toggle */}
+                {/* Wishlist toggle - exige cadastro/login de lead */}
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  type="button"
+                  onClick={() => {
+                    if (!customerUser) {
+                      setIsAuthOpen(true);
+                      return;
+                    }
+                    toggleWishlist(product.id);
+                  }}
                   className={`absolute top-4 left-4 p-2.5 rounded-full backdrop-blur-md transition-all shadow-md ${
                     isWished 
                       ? 'bg-[#DC7898] text-white shadow-rose-300/50' 
                       : 'bg-white/90 hover:bg-white text-stone-700 hover:text-[#DC7898]'
                   }`}
                   aria-label="Favoritar"
+                  title={isWished ? 'Remover dos favoritos' : customerUser ? 'Salvar peça no seu perfil' : 'Cadastre-se para curtir e salvar'}
                 >
                   <Heart className={`w-4 h-4 ${isWished ? 'fill-current' : ''}`} />
                 </button>
@@ -466,15 +474,19 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
 
               {/* Size Selector */}
               <div className="mb-6">
-                <div className="flex items-center justify-between text-xs mb-2.5">
-                  <span className="font-medium text-stone-700">
-                    Tamanho Selecionado: <strong className="text-[#DC7898]">{selectedSize}</strong>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs mb-3">
+                  <span className="font-medium text-stone-700 flex items-center gap-1.5">
+                    <span>Tamanho Selecionado:</span>
+                    <strong className="text-[#DC7898] font-bold text-sm bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200/70">
+                      {selectedSize}
+                    </strong>
                   </span>
                   <button
+                    type="button"
                     onClick={() => openProvadorVirtual(product)}
-                    className="text-xs font-semibold text-[#DC7898] hover:text-[#C65677] flex items-center gap-1 underline underline-offset-4"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#DC7898] hover:text-[#C65677] transition-colors underline underline-offset-4 self-start sm:self-auto cursor-pointer"
                   >
-                    <Ruler className="w-3.5 h-3.5" />
+                    <Ruler className="w-3.5 h-3.5 text-[#DC7898]" />
                     <span>Tabela de Medidas & Provador</span>
                   </button>
                 </div>
@@ -515,7 +527,7 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                 </div>
 
                 {/* Stock alert */}
-                <div className="mt-2.5 text-xs">
+                <div className="mt-3 text-xs">
                   {currentStock > 0 && currentStock <= 3 ? (
                     <span className="text-[#DC7898] font-medium flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
@@ -527,28 +539,29 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
                       Disponível no Estoque da Loja para envio imediato ({currentStock} peças)
                     </span>
                   ) : (
-                    <span className="text-rose-500 font-medium">
-                      Esgotado nesta numeração.
+                    <span className="text-stone-500 font-medium flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-stone-400" />
+                      Peça exclusiva produzida sob encomenda.
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Quantity & Add to Cart (Signature Delicate Rose CTA) */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center border border-rose-200 rounded-full bg-white p-1 shadow-2xs">
+              {/* Quantity & Add to Cart (Signature Delicate Rose CTA - Mobile Optimized) */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+                <div className="flex items-center justify-between sm:justify-center border border-rose-200 rounded-full bg-white p-1 shadow-2xs">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-stone-600 hover:bg-rose-50 disabled:opacity-30 transition-colors"
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-stone-600 hover:bg-rose-50 disabled:opacity-30 transition-colors text-base"
                   >
                     -
                   </button>
-                  <span className="w-10 text-center text-xs font-bold text-stone-900">{quantity}</span>
+                  <span className="w-12 text-center text-sm font-bold text-stone-900">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(currentStock, quantity + 1))}
-                    disabled={quantity >= currentStock}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-stone-600 hover:bg-rose-50 disabled:opacity-30 transition-colors"
+                    onClick={() => setQuantity(currentStock > 0 ? Math.min(currentStock, quantity + 1) : quantity + 1)}
+                    disabled={currentStock > 0 && quantity >= currentStock}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-stone-600 hover:bg-rose-50 disabled:opacity-30 transition-colors text-base"
                   >
                     +
                   </button>
@@ -556,8 +569,7 @@ const ProductDetailContent: React.FC<{ product: Product }> = ({ product }) => {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={currentStock <= 0}
-                  className="flex-1 py-4 px-8 rounded-full bg-gradient-to-r from-[#DC7898] via-[#E283A1] to-[#D46889] hover:from-[#D46889] hover:to-[#C65677] text-white text-xs sm:text-sm font-bold tracking-wider uppercase shadow-md shadow-rose-200/60 hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 group"
+                  className="flex-1 py-4 px-8 rounded-full bg-gradient-to-r from-[#DC7898] via-[#E283A1] to-[#D46889] hover:from-[#D46889] hover:to-[#C65677] text-white text-xs sm:text-sm font-bold tracking-wider uppercase shadow-md shadow-rose-200/60 hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                   <span>Adicionar à Sacola</span>

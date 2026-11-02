@@ -286,6 +286,8 @@ export const adminApi = {
     }),
   customers: (search = '') => adminRequest<{ customers: any[] }>(`/customers${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   customer: (id: string) => adminRequest<{ customer: any }>(`/customers/${id}`),
+  deleteCustomer: (id: string) => adminRequest<{ ok: boolean }>(`/customers/${id}`, { method: 'DELETE' }),
+  clearTestCustomers: () => adminRequest<{ ok: boolean; removedCount: number }>('/customers/clear-test', { method: 'POST' }),
   reviews: () => adminRequest<{ reviews: any[] }>('/reviews'),
 
   coupons: () => adminRequest<{ coupons: Coupon[] }>('/coupons'),

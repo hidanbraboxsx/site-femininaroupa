@@ -759,8 +759,9 @@ export function CustomersTab({ liveKey }: { liveKey: number }) {
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-  const { data, loading } = useLoad(() => adminApi.customers(query), [query, liveKey]);
+  const { data, loading, reload } = useLoad(() => adminApi.customers(query), [query, liveKey]);
   const customers = data?.customers || [];
+  const toast = useToast();
 
   const totals = useMemo(
     () => ({
@@ -791,7 +792,21 @@ export function CustomersTab({ liveKey }: { liveKey: number }) {
               />
             </Field>
           </div>
-          <Button variant="primary" onClick={() => setQuery(search)}>Buscar</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="primary" onClick={() => setQuery(search)}>Buscar</Button>
+            <Button
+              variant="outline"
+              icon={<Trash2 className="h-3.5 w-3.5 text-stone-400" />}
+              onClick={async () => {
+                if (!window.confirm('Deseja limpar todos os cadastros de teste?')) return;
+                const res = await adminApi.clearTestCustomers();
+                toast.push(`${res.removedCount} cadastro(s) de teste removidos.`, 'success');
+                await reload();
+              }}
+            >
+              Limpar Testes
+            </Button>
+          </div>
         </div>
 
         {loading && customers.length === 0 ? (

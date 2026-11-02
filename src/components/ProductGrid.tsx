@@ -17,10 +17,11 @@ export const ProductGrid: React.FC = () => {
     customization,
     loading,
     error,
-    refresh
+    refresh,
+    activeCategories
   } = useStore();
 
-  const categories = [
+  const categories = activeCategories || [
     'Todos',
     'Novidades',
     'Vestidos',

@@ -9,7 +9,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { setSelectedProductDetail, isInWishlist, toggleWishlist } = useStore();
+  const { setSelectedProductDetail, isInWishlist, toggleWishlist, customerUser, setIsAuthOpen } = useStore();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
   const colors = Array.isArray(product.colors) ? product.colors : [];
@@ -42,15 +42,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           loading="lazy"
         />
 
-        {/* Heart Favorite Button (Top Right) - Saved in customer profile */}
+        {/* Heart Favorite Button (Top Right) - Saved exclusively in customer profile */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            if (!customerUser) {
+              setIsAuthOpen(true);
+              return;
+            }
             toggleWishlist(product.id);
           }}
           className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 hover:bg-white text-stone-700 shadow-sm flex items-center justify-center transition-all z-20 hover:scale-110 active:scale-95 border border-rose-100/60"
-          title={isWished ? 'Remover das peças salvas' : 'Salvar peça no seu perfil'}
+          title={isWished ? 'Remover das peças salvas' : customerUser ? 'Salvar peça no seu perfil' : 'Cadastre-se para curtir e salvar'}
         >
           <Heart
             className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${

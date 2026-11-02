@@ -606,6 +606,29 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                         </span>
                       </div>
                     </div>
+
+                    {/* Botões de Ação Diretos */}
+                    <div className="pt-2 flex items-center gap-1.5 border-t border-[var(--admin-border)]">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 text-xs"
+                        icon={<Pencil className="h-3 w-3" />}
+                        onClick={() => openEdit(product)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-400 hover:text-red-300"
+                        icon={<Trash2 className="h-3 w-3" />}
+                        onClick={() => remove(product)}
+                        title="Remover produto da loja"
+                      >
+                        Excluir
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );
