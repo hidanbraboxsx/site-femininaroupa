@@ -17,7 +17,7 @@ import {
   Trash2,
   TriangleAlert
 } from 'lucide-react';
-import { adminApi } from '../../lib/api';
+import { adminApi, notifyStoreChange } from '../../lib/api';
 import type { Product } from '../../types';
 import { useAction, useLoad } from '../useLoad';
 import {
@@ -418,8 +418,12 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
     };
 
     const result = await run(async () => {
-      if (editing) await adminApi.updateProduct(editing.id, payload);
-      else await adminApi.createProduct(payload);
+      if (editing) {
+        await adminApi.updateProduct(editing.id, payload);
+      } else {
+        await adminApi.createProduct(payload);
+      }
+      notifyStoreChange();
       setOpen(false);
       await reload();
     });
@@ -429,7 +433,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
   async function remove(product: Product) {
     if (!window.confirm(`Remover "${product.name}" do catálogo? Esta ação não afeta pedidos já registrados.`)) return;
     const result = await run(async () => {
-      await adminApi.deleteProduct(product.id);
+      await adminApi.deleteProduct(product.id); notifyStoreChange();
       await reload();
     });
     toast.push(result.ok ? 'Produto removido.' : (result as any).error, result.ok ? 'success' : 'error');
@@ -1108,7 +1112,7 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
 
   async function create() {
     const result = await run(async () => {
-      await adminApi.createBanner({ ...form });
+      await adminApi.createBanner({ ...form }); notifyStoreChange();
       setOpen(false);
       await reload();
     });
@@ -1138,8 +1142,8 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
                   <div className="flex items-center justify-between">
                     <Badge tone={banner.active ? 'good' : 'neutral'}>{banner.active ? 'ativo' : 'inativo'}</Badge>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={async () => { await adminApi.updateBanner(banner.id, { active: !banner.active }); await reload(); }}>Alternar</Button>
-                      <button className="rounded-lg p-1.5 text-stone-400 hover:bg-red-500/10 hover:text-red-300" onClick={async () => { await adminApi.deleteBanner(banner.id); await reload(); }}>
+                      <Button size="sm" variant="ghost" onClick={async () => { await adminApi.updateBanner(banner.id, { active: !banner.active }); notifyStoreChange(); await reload(); }}>Alternar</Button>
+                      <button className="rounded-lg p-1.5 text-stone-400 hover:bg-red-500/10 hover:text-red-300" onClick={async () => { await adminApi.deleteBanner(banner.id); notifyStoreChange(); await reload(); }}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>

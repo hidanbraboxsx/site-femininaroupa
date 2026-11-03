@@ -23,7 +23,7 @@ import {
   Trash2,
   Wallet
 } from 'lucide-react';
-import { adminApi } from '../../lib/api';
+import { adminApi, notifyStoreChange } from '../../lib/api';
 import { useAction, useLoad } from '../useLoad';
 import {
   Badge,
@@ -710,12 +710,27 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
 
   async function save(section: 'customization' | 'gateway' | 'shipping' | 'payments') {
     const result = await run(async () => {
-      if (section === 'customization') await adminApi.saveCustomization(customization);
-      if (section === 'gateway') await adminApi.saveGateway(gateway);
-      if (section === 'shipping') await adminApi.saveShipping(shipping);
-      if (section === 'payments') await adminApi.savePaymentMethods(paymentMethods);
+      if (section === 'customization') {
+        await adminApi.saveCustomization(customization);
+        notifyStoreChange({ customization });
+      }
+      if (section === 'gateway') {
+        await adminApi.saveGateway(gateway);
+        notifyStoreChange();
+      }
+      if (section === 'shipping') {
+        await adminApi.saveShipping(shipping);
+        notifyStoreChange();
+      }
+      if (section === 'payments') {
+        await adminApi.savePaymentMethods(paymentMethods);
+        notifyStoreChange();
+      }
       await reload();
     });
+    if (result.ok) {
+      notifyStoreChange({ customization });
+    }
     toast.push(result.ok ? 'Configuração salva com sucesso.' : (result as any).error, result.ok ? 'success' : 'error');
   }
 

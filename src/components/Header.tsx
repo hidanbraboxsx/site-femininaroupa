@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { SupportModal } from './SupportModal';
-import { IconSparkle, IconTapeMeasure } from './ui/vector';
+import { IconSparkle, IconTapeMeasure, IconTikTok, IconPinterest, IconWhatsApp } from './ui/vector';
 import { formatCurrency } from '../utils/validators';
 
 export const Header: React.FC = () => {
@@ -57,26 +57,68 @@ export const Header: React.FC = () => {
       {/* 1. TOP BAR (White / Off-White delicate bar) */}
       <div className="bg-[#FAF7F8] border-b border-rose-100/60 text-[10px] sm:text-xs text-stone-600 py-1 sm:py-1.5 px-3 sm:px-8 w-full max-w-full overflow-hidden">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 w-full min-w-0">
-          {/* Social Icons */}
+          {/* Social Icons Dinâmicos configurados no Painel Admin */}
           <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-            <a 
-              href="https://instagram.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-stone-500 hover:text-[#DC7898] transition-colors"
-              aria-label="Instagram"
-            >
-              <Instagram className="w-3.5 h-3.5" />
-            </a>
-            <a 
-              href="https://facebook.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-stone-500 hover:text-[#DC7898] transition-colors"
-              aria-label="Facebook"
-            >
-              <Facebook className="w-3.5 h-3.5" />
-            </a>
+            {customization?.socials?.instagram?.url && (
+              <a 
+                href={customization.socials.instagram.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-500 hover:text-[#DC7898] transition-colors"
+                aria-label="Instagram"
+                title="Instagram"
+              >
+                <Instagram className="w-3.5 h-3.5" />
+              </a>
+            )}
+            {customization?.socials?.facebook?.url && (
+              <a 
+                href={customization.socials.facebook.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-500 hover:text-[#DC7898] transition-colors"
+                aria-label="Facebook"
+                title="Facebook"
+              >
+                <Facebook className="w-3.5 h-3.5" />
+              </a>
+            )}
+            {customization?.socials?.tiktok?.url && (
+              <a 
+                href={customization.socials.tiktok.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-500 hover:text-[#DC7898] transition-colors"
+                aria-label="TikTok"
+                title="TikTok"
+              >
+                <IconTikTok size={14} className="w-3.5 h-3.5" />
+              </a>
+            )}
+            {customization?.socials?.pinterest?.url && (
+              <a 
+                href={customization.socials.pinterest.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-500 hover:text-[#DC7898] transition-colors"
+                aria-label="Pinterest"
+                title="Pinterest"
+              >
+                <IconPinterest size={14} className="w-3.5 h-3.5" />
+              </a>
+            )}
+            {customization?.whatsappNumber && (
+              <a 
+                href={`https://wa.me/55${customization.whatsappNumber.replace(/\D/g, '')}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-500 hover:text-emerald-600 transition-colors"
+                aria-label="WhatsApp"
+                title="WhatsApp"
+              >
+                <IconWhatsApp size={14} className="w-3.5 h-3.5" />
+              </a>
+            )}
           </div>
 
           {/* Center Message */}
@@ -94,7 +136,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* 2. MAIN HEADER (Signature Flor de Seda Rose #DC7898) */}
-      <div className="bg-[#DC7898] text-white px-3 sm:px-8 py-2.5 sm:py-3.5 w-full max-w-full overflow-hidden">
+      <div className="text-white px-3 sm:px-8 py-2.5 sm:py-3.5 w-full max-w-full overflow-hidden transition-colors" style={{ backgroundColor: customization?.headerBgColor || customization?.primaryColor || "#DC7898" }}>
         <div className="max-w-7xl mx-auto">
           {/* Top Row: Menu + Logo + Desktop Search + Actions */}
           <div className="flex items-center justify-between gap-2 sm:gap-6">

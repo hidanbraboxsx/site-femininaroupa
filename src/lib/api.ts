@@ -85,8 +85,30 @@ export interface StorePayload {
   generatedAt: string;
 }
 
+
+export function notifyStoreChange(extraData?: { customization?: any; banners?: any[]; products?: any[] }) {
+  try {
+    if (extraData?.customization) {
+      localStorage.setItem('aura_synced_customization', JSON.stringify(extraData.customization));
+    }
+    if (extraData?.banners) {
+      localStorage.setItem('aura_synced_banners', JSON.stringify(extraData.banners));
+    }
+  } catch {}
+
+  try {
+    const channel = new BroadcastChannel('aura_store_sync');
+    channel.postMessage({ type: 'store_updated', timestamp: Date.now(), ...extraData });
+    channel.close();
+  } catch {}
+
+  try {
+    localStorage.setItem('aura_last_sync_timestamp', String(Date.now()));
+  } catch {}
+}
+
 export const shopApi = {
-  store: () => request<StorePayload>(`${PUBLIC_BASE}/store`),
+  store: () => request<StorePayload>(`${PUBLIC_BASE}/store?t=${Date.now()}`, { cache: 'no-store' }),
   products: () => request<{ products: Product[]; categories: string[] }>(`${PUBLIC_BASE}/products`),
   reviews: (productId: string) =>
     request<{ reviews: any[]; rating: number; count: number }>(`${PUBLIC_BASE}/products/${productId}/reviews`),

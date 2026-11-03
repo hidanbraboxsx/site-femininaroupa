@@ -9,7 +9,7 @@ interface CategoryCard {
   imageUrl: string;
 }
 
-const CATEGORY_CARDS: CategoryCard[] = [
+const DEFAULT_CATEGORY_CARDS: CategoryCard[] = [
   {
     name: 'Vestidos',
     label: 'Vestidos Fluídos & Longos',
@@ -33,11 +33,29 @@ const CATEGORY_CARDS: CategoryCard[] = [
     label: 'Tricots & Canelados',
     description: 'Toque de nuvem, golas médias e maciez hipoalergênica.',
     imageUrl: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=700&q=80'
+  },
+  {
+    name: 'Blusas & Camisas',
+    label: 'Blusas & Camisas Nobres',
+    description: 'Caimento suave, detalhes delicados e alfaiataria leve.',
+    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=700&q=80'
+  },
+  {
+    name: 'Calças & Jeans',
+    label: 'Calças & Alfaiataria',
+    description: 'Modelagem que abraça a silhueta com elegância e conforto.',
+    imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=700&q=80'
+  },
+  {
+    name: 'Saias',
+    label: 'Saias Midi & Esvoaçantes',
+    description: 'Movimento gracioso em tecidos leves e femininos.',
+    imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=700&q=80'
   }
 ];
 
 export const CategoryHighlights: React.FC = () => {
-  const { setSelectedCategory, products } = useStore();
+  const { setSelectedCategory, products, activeCategories, customization } = useStore();
 
   const handleSelect = (category: string) => {
     setSelectedCategory(category);
@@ -47,11 +65,22 @@ export const CategoryHighlights: React.FC = () => {
     }
   };
 
+  // Filtra de acordo com as categorias ativadas pelo admin
+  const visibleCards = React.useMemo(() => {
+    const activeNames = new Set(activeCategories || []);
+    const filtered = DEFAULT_CATEGORY_CARDS.filter((c) => activeNames.has(c.name) || activeNames.has('Todos'));
+    return filtered.slice(0, 4); // Exibe até 4 cards em destaque
+  }, [activeCategories]);
+
+  if (visibleCards.length === 0) return null;
+
   return (
     <section className="py-6 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-10 px-1">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase font-semibold text-rose-500 tracking-[0.2em]">Curadoria Exclusiva</span>
+          <span className="text-[10px] sm:text-xs uppercase font-semibold tracking-[0.2em]" style={{ color: customization.primaryColor }}>
+            Curadoria Exclusiva
+          </span>
           <h2 className="font-serif text-xl sm:text-3xl lg:text-4xl text-stone-900 font-medium mt-0.5 sm:mt-1">
             Categorias em Destaque
           </h2>
@@ -62,32 +91,35 @@ export const CategoryHighlights: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 w-full max-w-full">
-        {CATEGORY_CARDS.map((cat) => {
-          const count = products.filter(p => p.category === cat.name).length;
+        {visibleCards.map((cat) => {
+          const count = products.filter((p) => p.category === cat.name).length;
           return (
             <button
               key={cat.name}
               onClick={() => handleSelect(cat.name)}
               className="group relative h-52 sm:h-80 lg:h-96 rounded-2xl sm:rounded-3xl overflow-hidden text-left focus:outline-none shadow-sm hover:shadow-xl transition-all duration-500 w-full min-w-0 max-w-full select-none"
             >
-              {/* Background Image */}
+              {/* Imagem de Fundo da Categoria */}
               <img
                 src={cat.imageUrl}
                 alt={cat.label}
                 className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 filter brightness-95"
               />
-              
-              {/* Gradient Overlay */}
+
+              {/* Degradê sobre a imagem */}
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-rose-950/30 to-transparent" />
 
-              {/* Bottom Content */}
+              {/* Informações da Categoria */}
               <div className="absolute inset-0 p-3 sm:p-6 flex flex-col justify-end text-white">
                 <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-widest text-rose-200 mb-0.5 sm:mb-1">
                   {count} {count === 1 ? 'modelo' : 'modelos'}
                 </span>
                 <h3 className="font-serif text-xs sm:text-xl lg:text-2xl font-medium leading-snug text-white mb-1 sm:mb-1.5 flex items-center justify-between">
                   <span className="truncate pr-1">{cat.label}</span>
-                  <div className="w-5 h-5 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors shrink-0">
+                  <div
+                    className="w-5 h-5 sm:w-8 sm:h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:text-white transition-colors shrink-0"
+                    style={{ backgroundColor: `${customization.primaryColor}80` }}
+                  >
                     <ArrowUpRight className="w-2.5 h-2.5 sm:w-4 sm:h-4" />
                   </div>
                 </h3>

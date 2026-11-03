@@ -341,11 +341,11 @@ useEffect(() => {
     loadSession();
   }, [loadStore, loadSession]);
 
-  /* --------------- Sincronização inteligente em tempo real (SSE + Fallback) --------------- */
+  /* --------------- Sincronização inteligente em tempo real (BroadcastChannel + Storage + Visibility + SSE) --------------- */
   useEffect(() => {
     let source: EventSource | null = null;
-    let fallbackTimer: any = null;
 
+    // 1. SSE do servidor para mudanças no backend
     try {
       source = new EventSource('/api/events');
       source.addEventListener('change', () => {
@@ -353,23 +353,49 @@ useEffect(() => {
         if (customerToken.get()) loadSession();
       });
       source.onerror = () => {
-        if (!fallbackTimer) {
-          fallbackTimer = setInterval(() => {
-            loadStore();
-            if (customerToken.get()) loadSession();
-          }, 12000);
-        }
+        /* se SSE desconectar ou em ambiente serverless, os listeners locais mantêm a sincronia */
       };
-    } catch {
-      fallbackTimer = setInterval(() => {
+    } catch {}
+
+    // 2. BroadcastChannel: comunicação instantânea entre abas no mesmo navegador (0ms de atraso)
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('aura_store_sync');
+      channel.onmessage = () => {
         loadStore();
         if (customerToken.get()) loadSession();
-      }, 12000);
-    }
+      };
+    } catch {}
+
+    // 3. Storage event: detecta quando o admin salva alterações em outra aba/janela
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'aura_last_sync_timestamp' || e.key === 'aura_synced_customization' || e.key === 'aura_synced_banners') {
+        loadStore();
+        if (customerToken.get()) loadSession();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    // 4. Ao alternar para a aba da loja (quando o admin clica de volta na aba da loja)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadStore();
+        if (customerToken.get()) loadSession();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // 5. Polling rápido de conferência (a cada 3.5s) garantindo que a página inicial nunca fique desatualizada
+    const pollInterval = setInterval(() => {
+      loadStore();
+    }, 3500);
 
     return () => {
       if (source) source.close();
-      if (fallbackTimer) clearInterval(fallbackTimer);
+      if (channel) channel.close();
+      window.removeEventListener('storage', handleStorage);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(pollInterval);
     };
   }, [loadStore, loadSession]);
 
@@ -423,8 +449,25 @@ useEffect(() => {
   /* ------------------------- Cores e tipografia ------------------------- */
 
   const customization = useMemo<StoreCustomization>(() => {
+    let localSaved: any = null;
+    try {
+      const raw = localStorage.getItem('aura_synced_customization');
+      if (raw) localSaved = JSON.parse(raw);
+    } catch {}
     const source = (payload?.settings?.customization || {}) as Partial<StoreCustomization>;
-    return { ...FALLBACK_CUSTOMIZATION, ...source } as StoreCustomization;
+    return { ...FALLBACK_CUSTOMIZATION, ...source, ...(localSaved || {}) } as StoreCustomization;
+  }, [payload]);
+
+  const banners = useMemo<Banner[]>(() => {
+    let localBanners: any[] | null = null;
+    try {
+      const raw = localStorage.getItem('aura_synced_banners');
+      if (raw) localBanners = JSON.parse(raw);
+    } catch {}
+    if (localBanners && Array.isArray(localBanners) && localBanners.length > 0) {
+      return localBanners;
+    }
+    return payload?.banners || [];
   }, [payload]);
 
   const activeCategories = useMemo(() => {
@@ -468,7 +511,6 @@ useEffect(() => {
   }, [customization]);
 
   const products = payload?.products || [];
-  const banners = payload?.banners || [];
   const paymentMethods = payload?.settings?.paymentMethods || [
     { id: 'pix', name: 'PIX', enabled: true, badge: 'Aprovação Imediata' },
     { id: 'credit_card', name: 'CARTÃO (ATENDIMENTO)', enabled: true, badge: 'Personalizado' }
