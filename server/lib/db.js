@@ -23,6 +23,12 @@ let writeCount = 0;
 function migrate(data) {
   const seed = buildSeed();
   const merged = { ...seed, ...data };
+  merged.products = Array.isArray(data.products) ? data.products : [];
+  merged.orders = Array.isArray(data.orders) ? data.orders : [];
+  merged.customers = Array.isArray(data.customers) ? data.customers : [];
+  merged.coupons = Array.isArray(data.coupons) ? data.coupons : [];
+  merged.carts = Array.isArray(data.carts) ? data.carts : [];
+  merged.auditLog = Array.isArray(data.auditLog) ? data.auditLog : [];
   merged.meta = { ...seed.meta, ...(data.meta || {}) };
   merged.settings = {
     customization: { ...seed.settings.customization, ...(data.settings?.customization || {}) },

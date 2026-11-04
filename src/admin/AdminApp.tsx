@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Eye,
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -16,6 +17,7 @@ import {
   ShieldCheck,
   Shirt,
   ShoppingCart,
+  Smartphone,
   Store,
   Sun,
   Tag,
@@ -29,9 +31,11 @@ import { Badge, Button, ToastProvider, cn, formatDate, useToast } from './ui';
 import { CartsTab, CustomersTab, OrdersTab, OverviewTab } from './tabs/Operations';
 import { BannersTab, CatalogTab, CouponsTab, StockTab } from './tabs/Inventory';
 import { FinanceTab, SecurityTab, SettingsTab, TelegramTab } from './tabs/System';
+import { PreviewTab } from './tabs/Preview';
 
 type TabId =
   | 'visao'
+  | 'preview'
   | 'pedidos'
   | 'carrinhos'
   | 'clientes'
@@ -49,6 +53,7 @@ const NAV: Array<{ group: string; items: Array<{ id: TabId; label: string; icon:
     group: 'Operação',
     items: [
       { id: 'visao', label: 'Visão geral', icon: <LayoutDashboard className="h-4 w-4" /> },
+      { id: 'preview', label: 'Preview da Loja', icon: <Eye className="h-4 w-4 text-rose-400" /> },
       { id: 'pedidos', label: 'Pedidos', icon: <Receipt className="h-4 w-4" /> },
       { id: 'carrinhos', label: 'Carrinhos', icon: <ShoppingCart className="h-4 w-4" /> },
       { id: 'clientes', label: 'Clientes', icon: <Users className="h-4 w-4" /> }
@@ -76,6 +81,7 @@ const NAV: Array<{ group: string; items: Array<{ id: TabId; label: string; icon:
 
 const TITLES: Record<TabId, { title: string; subtitle: string }> = {
   visao: { title: 'Visão geral', subtitle: 'números calculados a partir das operações reais' },
+  preview: { title: 'Preview da Loja', subtitle: 'visão real do lead em celular, tablet e computador 100% sincronizado' },
   pedidos: { title: 'Pedidos', subtitle: 'ciclo de vida completo com regras de transição' },
   carrinhos: { title: 'Carrinhos', subtitle: 'intenção de compra e abandono real' },
   clientes: { title: 'Clientes', subtitle: 'contas criadas na loja' },
@@ -148,6 +154,8 @@ function AdminShell({ session, onLogout }: { session: { username: string; expire
     switch (tab) {
       case 'visao':
         return <OverviewTab liveKey={liveKey} onNavigate={(next) => setTab(next as TabId)} />;
+      case 'preview':
+        return <PreviewTab />;
       case 'pedidos':
         return <OrdersTab liveKey={liveKey} />;
       case 'carrinhos':
@@ -285,6 +293,19 @@ function AdminShell({ session, onLogout }: { session: { username: string; expire
                 </div>
               ) : null}
             </div>
+
+            <button
+              onClick={() => setTab('preview')}
+              className={cn(
+                "hidden items-center gap-1.5 rounded-lg border px-2.5 py-2 text-[11px] sm:flex transition-colors",
+                tab === 'preview'
+                  ? "border-rose-500/50 bg-rose-500/10 text-rose-400 font-semibold"
+                  : "border-[var(--admin-border)] text-[var(--admin-text-muted)] hover:text-[var(--admin-text-main)] hover:bg-[var(--admin-item-hover)]"
+              )}
+              title="Abrir simulador ao vivo da loja em mobile e desktop"
+            >
+              <Smartphone className="h-3.5 w-3.5 text-rose-400" /> preview
+            </button>
 
             <a
               href="/"

@@ -134,6 +134,17 @@ export const CustomerAuthModal: React.FC = () => {
   const [addressLoading, setAddressLoading] = useState(false);
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
+  // Orders filters & search states (must be declared here, before any functions, to satisfy React hooks rules)
+  const [searchItem, setSearchItem] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [sortOption, setSortOption] = useState<string>('recente');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
+
   // Sync profile edit form with customerUser data
   useEffect(() => {
     if (!isAuthOpen || profileTab !== 'purchases') return;
@@ -361,15 +372,6 @@ export const CustomerAuthModal: React.FC = () => {
       setTimeout(() => setAddressFeedback(null), 2500);
     }
   };
-  const [searchItem, setSearchItem] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all');
-  const [sortOption, setSortOption] = useState<string>('recente');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
-  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
-  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
 
   // Pedidos reais desta cliente (a API já filtra pelo e-mail autenticado)
   const customerOrders = orders;

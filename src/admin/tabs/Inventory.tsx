@@ -1,4 +1,4 @@
-const SAFE_IMG_PLACEHOLDER = "data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.5%22%3E%3Crect width=%2218%22 height=%2218%22 x=%223%22 y=%223%22 rx=%222%22/%3E%3Ccircle cx=%229%22 cy=%229%22 r=%222%22/%3E%3Cpath d=%22m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21%22/%3E%3C/svg%3E";
+const SAFE_IMG_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzg4OCIgc3Ryb2tlLXdpZHRoPSIxLjUiPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgeD0iMyIgeT0iMyIgcng9IjIiLz48Y2lyY2xlIGN4PSI5IiBjeT0iOSIgcj0iMiIvPjxwYXRoIGQ9Im0yMSAxNS0zLjA4Ni0zLjA4NmEyIDIgMCAwIDAtMi44MjggMEw2IDIxIi8+PC9zdmc+";
 import React, { useState } from 'react';
 import {
   ArrowDownLeft,
@@ -171,7 +171,7 @@ export function StockTab({ liveKey }: { liveKey: number }) {
               <div key={product.id} className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-3.5 shadow-sm hover:border-rose-500/30 transition-all">
                 <div className="flex items-start gap-3 mb-2.5">
                   {product.images?.[0] ? (
-                    <img src={product.images[0]} alt="" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} className="h-12 w-12 rounded-xl object-cover border border-[var(--admin-border)] shrink-0 shadow-xs" />
+                    <img referrerPolicy="no-referrer" src={product.images[0]} alt="" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} className="h-12 w-12 rounded-xl object-cover border border-[var(--admin-border)] shrink-0 shadow-xs" />
                   ) : (
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black/10 dark:bg-white/5 border border-[var(--admin-border)] shrink-0">
                       <ImageIcon className="h-5 w-5 text-stone-500" />
@@ -399,22 +399,32 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
   }
 
   async function save() {
+    if (!form.name || form.name.trim().length < 2) {
+      toast.push('Por favor, informe o Nome da Peça (mínimo 2 letras).', 'error');
+      return;
+    }
+    const numPrice = Number(form.price);
+    if (isNaN(numPrice) || numPrice <= 0) {
+      toast.push('Por favor, informe o Preço de Venda da peça.', 'error');
+      return;
+    }
+
     const payload = {
-      name: form.name,
-      sku: form.sku,
-      category: form.category,
-      price: Number(form.price),
+      name: form.name.trim(),
+      sku: form.sku.trim(),
+      category: form.category.trim() || 'Vestidos',
+      price: numPrice,
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
-      costPrice: Number(form.costPrice),
-      description: form.description,
-      fabric: form.fabric,
-      care: form.care,
+      costPrice: Number(form.costPrice || 0),
+      description: form.description.trim(),
+      fabric: form.fabric.trim(),
+      care: form.care.trim(),
       images: Array.isArray(form.images) ? form.images.filter(Boolean) : (form.images ? [form.images] : []),
-      sizes: form.sizes.split(',').map((size: string) => size.trim()).filter(Boolean),
-      colors: parseColors(form.colors),
-      initialStock: Number(form.initialStock),
-      isNewArrival: form.isNewArrival,
-      isFeatured: form.isFeatured
+      sizes: (form.sizes || 'PP, P, M, G, GG').split(',').map((size: string) => size.trim()).filter(Boolean),
+      colors: parseColors(form.colors || 'Único'),
+      initialStock: Math.max(0, Number(form.initialStock || 0)),
+      isNewArrival: Boolean(form.isNewArrival),
+      isFeatured: Boolean(form.isFeatured)
     };
 
     const result = await run(async () => {
@@ -427,7 +437,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
       setOpen(false);
       await reload();
     });
-    toast.push(result.ok ? (editing ? 'Produto atualizado.' : 'Produto criado.') : (result as any).error, result.ok ? 'success' : 'error');
+    toast.push(result.ok ? (editing ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso no catálogo!') : (result as any).error, result.ok ? 'success' : 'error');
   }
 
   async function remove(product: Product) {
@@ -657,7 +667,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                 <Td>
                   <div className="flex items-center gap-2.5">
                     {product.images?.[0] ? (
-                      <img src={product.images[0]} alt="" className="h-10 w-10 rounded-xl object-cover border border-[var(--admin-border)] shadow-xs" />
+                      <img referrerPolicy="no-referrer" src={product.images[0]} alt="" className="h-10 w-10 rounded-xl object-cover border border-[var(--admin-border)] shadow-xs" />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5"><ImageIcon className="h-4 w-4 text-stone-600" /></div>
                     )}
@@ -704,7 +714,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
         footer={
           <>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button variant="primary" loading={busy} onClick={save} disabled={!form.name || !form.price}>Salvar produto</Button>
+            <Button variant="primary" loading={busy} onClick={save} >Salvar produto</Button>
           </>
         }
       >
@@ -850,7 +860,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
                   <div className="flex gap-2 flex-wrap">
                     {previewPhotos.map((imgUrl: string, idx: number) => (
                       <div key={idx} className="relative group rounded-xl overflow-hidden border border-[var(--admin-border)] bg-black/20 shadow-xs">
-                        <img src={imgUrl} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-16 w-16 object-cover" />
+                        <img referrerPolicy="no-referrer" src={imgUrl} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-16 w-16 object-cover" />
                         <button
                           type="button"
                           onClick={() => {
@@ -904,7 +914,7 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
               <div className="rounded-2xl border border-white/10 bg-white dark:bg-stone-900 shadow-md overflow-hidden text-stone-900 dark:text-stone-100">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
                   {previewPhotos[0] ? (
-                    <img src={previewPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-full w-full object-cover" />
+                    <img referrerPolicy="no-referrer" src={previewPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = SAFE_IMG_PLACEHOLDER; }} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-stone-400">
                       <ImageIcon className="h-12 w-12 stroke-1" />
@@ -1137,7 +1147,7 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
           <div className="grid gap-3 md:grid-cols-2">
             {banners.map((banner) => (
               <div key={banner.id} className="overflow-hidden rounded-xl border border-[#26262e]">
-                {banner.imageUrl ? <img src={banner.imageUrl} alt="" className="h-32 w-full object-cover" /> : null}
+                {banner.imageUrl ? <img referrerPolicy="no-referrer" src={banner.imageUrl} alt="" className="h-32 w-full object-cover" /> : null}
                 <div className="p-3">
                   <div className="flex items-center justify-between">
                     <Badge tone={banner.active ? 'good' : 'neutral'}>{banner.active ? 'ativo' : 'inativo'}</Badge>
