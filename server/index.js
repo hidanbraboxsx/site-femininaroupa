@@ -27,12 +27,15 @@ function securityHeaders(req, res, next) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  // Permite preview do admin (localhost:3100) em iframe sem quebrar o isolamento
-  const frameAncestors = "'self' http://localhost:3100 http://127.0.0.1:3100 http://localhost:3000 http://127.0.0.1:3000";
+  // Permite preview do admin (localhost/127.0.0.1 em qualquer porta) em iframe sem quebrar o isolamento
+  const devFrameAncestors = "'self' http://localhost:* http://127.0.0.1:* http://*:* https://*:*";
+  const prodFrameAncestors = "'self' http://localhost:3100 http://127.0.0.1:3100 http://localhost:3000 http://127.0.0.1:3000";
+  const frameAncestors = !config.isProduction ? devFrameAncestors : prodFrameAncestors;
+
   if (!config.isProduction) {
     res.setHeader(
       'Content-Security-Policy',
-      `default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: https:; frame-ancestors ${frameAncestors};`
+      `default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: https: http:; frame-ancestors ${frameAncestors};`
     );
   } else {
     res.setHeader(

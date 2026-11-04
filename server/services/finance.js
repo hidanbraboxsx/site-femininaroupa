@@ -154,18 +154,27 @@ export function dashboardMetrics() {
  }
  }
 
- // Série de faturamento dos últimos 14 dias (somente pagamentos confirmados)
- const revenueByDay = [];
- for (let offset = 13; offset >= 0; offset -= 1) {
- const day = new Date(now - offset * 864e5);
- const key = day.toISOString().slice(0, 10);
- const total = sum(
- data.orders
- .filter((order) => order.paymentStatus === 'confirmado' && order.createdAt.slice(0, 10) === key)
- .map((order) => order.total)
- );
- revenueByDay.push({ day: key, total });
- }
+   // Função para extrair a data YYYY-MM-DD no fuso de Brasília (America/Sao_Paulo)
+  const getBrDate = (timestamp) => {
+    try {
+      const d = new Date(timestamp);
+      return d.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    } catch {
+      return new Date(timestamp).toISOString().slice(0, 10);
+    }
+  };
+
+  // Série de faturamento dos últimos 14 dias (somente pagamentos confirmados)
+  const revenueByDay = [];
+  for (let offset = 13; offset >= 0; offset -= 1) {
+    const day = new Date(now - offset * 864e5);
+    const key = getBrDate(day);
+    const dayOrders = data.orders.filter(
+      (order) => order.paymentStatus === 'confirmado' && (getBrDate(order.createdAt) === key || order.createdAt?.slice(0, 10) === key)
+    );
+    const total = sum(dayOrders.map((order) => order.total));
+    revenueByDay.push({ day: key, total, count: dayOrders.length });
+  }
 
  const productSales = new Map();
  for (const order of data.orders.filter((entry) => entry.paymentStatus !== 'cancelado')) {

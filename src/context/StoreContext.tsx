@@ -17,6 +17,7 @@ interface CartTotals {
 }
 
 export interface StoreLocation {
+  enabled?: boolean; // Se false: Boutique 100% Virtual / E-commerce Exclusivo
   cep: string;
   street: string;
   number: string;
@@ -42,6 +43,7 @@ export interface StoreCustomization {
   supportEmail: string;
   businessHours: string;
   addressDisplay: string;
+  isPhysicalStore?: boolean;
   storeLocation?: StoreLocation;
   storeStatus?: 'online' | 'maintenance' | 'private';
   maintenanceTitle?: string;

@@ -10,7 +10,9 @@ import {
   Sparkles, 
   ArrowRight,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  MapPin,
+  Globe
 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
@@ -260,7 +262,17 @@ export const Footer: React.FC = () => {
                 <Clock className="w-3.5 h-3.5 text-[#DC7898] flex-shrink-0" />
                 <span>{customization?.businessHours || '—'}</span>
               </li>
-              {customization?.addressDisplay ? <li>{customization.addressDisplay}</li> : null}
+              {customization?.storeLocation?.enabled === false ? (
+                <li className="flex items-center gap-2 text-rose-900 font-medium bg-rose-50/70 rounded-lg px-2 py-1.5 border border-rose-100/70">
+                  <Globe className="w-3.5 h-3.5 text-[#DC7898] flex-shrink-0" />
+                  <span>Boutique 100% Virtual · Envio Exclusivo para Todo o Brasil</span>
+                </li>
+              ) : customization?.addressDisplay ? (
+                <li className="flex items-start gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-[#DC7898] flex-shrink-0 mt-0.5" />
+                  <span>{customization.addressDisplay}</span>
+                </li>
+              ) : null}
               <li className="text-emerald-700 font-medium">Garantia de 1ª Troca Grátis em até 30 dias</li>
             </ul>
           </div>

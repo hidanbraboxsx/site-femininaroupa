@@ -23,6 +23,8 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
+  Store,
   Trash2,
   Wallet
 } from 'lucide-react';
@@ -1658,127 +1660,251 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
       {/* 4. Localização Física da Loja & Preenchimento por CEP */}
       <Card>
         <SectionTitle
-          title="Localização Física da Loja de Roupas Femininas"
-          subtitle="Altere a localização com preenchimento automático de total precisão via CEP"
-          action={<Badge tone="good">ViaCEP Oficial</Badge>}
+          title="Localização Física da Loja & Modo de Operação"
+          subtitle="Ative o modo loja física para exibir endereço aos clientes ou desative para operar 100% virtual"
+          action={
+            customization.storeLocation?.enabled === false ? (
+              <Badge tone="neutral">Boutique 100% Virtual</Badge>
+            ) : (
+              <Badge tone="good">Loja Física Ativa</Badge>
+            )
+          }
         />
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-end gap-3">
-            <div className="flex-1 w-full">
-              <Field label="CEP da Loja" hint="Digite os 8 dígitos para preenchimento automático">
+        <div className="space-y-5">
+          {/* Toggle Principal: Loja Física vs Boutique 100% Virtual */}
+          <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                'flex h-11 w-11 items-center justify-center rounded-xl border transition-all',
+                customization.storeLocation?.enabled === false
+                  ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              )}>
+                {customization.storeLocation?.enabled === false ? (
+                  <Globe className="h-5 w-5" />
+                ) : (
+                  <Store className="h-5 w-5" />
+                )}
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--admin-text-main)] flex items-center gap-2">
+                  {customization.storeLocation?.enabled === false ? (
+                    <>
+                      <span>Modo Boutique 100% Virtual</span>
+                      <span className="text-[10px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">Exclusivo E-commerce</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Modo Loja Física & Ponto Presencial</span>
+                      <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">Endereço Visível</span>
+                    </>
+                  )}
+                </h4>
+                <p className="text-xs text-[var(--admin-text-muted)] mt-0.5">
+                  {customization.storeLocation?.enabled === false
+                    ? 'O endereço físico fica oculto no site. O rodapé e suporte mostram a chancela oficial de Boutique Online com entregas para todo o Brasil.'
+                    : 'O endereço da sua boutique fica visível no rodapé, canais de atendimento e links para rotas no Google Maps.'}
+                </p>
+              </div>
+            </div>
+
+            <Toggle
+              label={customization.storeLocation?.enabled === false ? 'Ativar Loja Física' : 'Loja Física Ativada'}
+              checked={customization.storeLocation?.enabled !== false}
+              onChange={(checked) => {
+                const loc = { ...(customization.storeLocation || {}), enabled: checked };
+                setCustomization({ ...customization, storeLocation: loc, isPhysicalStore: checked });
+              }}
+            />
+          </div>
+
+          {/* Preview em Tempo Real da Visão do Lead */}
+          <div className="rounded-2xl border border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-black/20 to-pink-500/5 p-4">
+            <div className="flex items-center justify-between mb-3 border-b border-rose-500/10 pb-2">
+              <span className="text-xs font-semibold text-rose-300 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-rose-400" />
+                Preview em Tempo Real · Visão do Cliente no Rodapé / Site
+              </span>
+              <span className="text-[10px] font-mono text-stone-400">100% idêntico ao lead</span>
+            </div>
+
+            {customization.storeLocation?.enabled === false ? (
+              /* Card Preview: Boutique 100% Virtual */
+              <div className="rounded-xl border border-purple-500/20 bg-purple-950/20 p-3.5 text-xs text-purple-200 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300">
+                    <Globe className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-stone-100 flex items-center gap-1.5">
+                      Boutique 100% Virtual · Flor de Seda
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    </p>
+                    <p className="text-[11px] text-purple-300/80">
+                      Vendas online exclusivas com envio expresso e seguro para todo o território nacional.
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-purple-500/20 border border-purple-500/40 px-2.5 py-1 text-[10px] font-semibold text-purple-300">
+                  Sem Loja Física
+                </span>
+              </div>
+            ) : (
+              /* Card Preview: Loja Física */
+              <div className="rounded-xl border border-rose-500/20 bg-black/40 p-3.5 text-xs text-stone-300 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-stone-100">
+                      {customization.addressDisplay || 'Alameda Lorena, 1420 — Jardins, São Paulo/SP'}
+                    </p>
+                    <p className="text-[11px] text-stone-400">
+                      Boutique Flor de Seda · Atendimento Presencial & Retirada VIP
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold text-emerald-400">
+                    Visível no Site
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Formulário de Endereço (Preenchimento por CEP) */}
+          <div className={cn(
+            'space-y-4 transition-opacity',
+            customization.storeLocation?.enabled === false && 'opacity-60 pointer-events-none'
+          )}>
+            <div className="flex flex-col sm:flex-row items-end gap-3">
+              <div className="flex-1 w-full">
+                <Field label="CEP da Loja" hint="Digite os 8 dígitos para preenchimento automático">
+                  <Input
+                    value={customization.storeLocation?.cep || ''}
+                    disabled={customization.storeLocation?.enabled === false}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const loc = { ...(customization.storeLocation || {}), cep: raw };
+                      setCustomization({ ...customization, storeLocation: loc });
+                      if (raw.replace(/\D/g, '').length === 8) {
+                        searchCep(raw);
+                      }
+                    }}
+                    placeholder="01424-002"
+                  />
+                </Field>
+              </div>
+              <Button
+                variant="subtle"
+                loading={cepLoading}
+                disabled={customization.storeLocation?.enabled === false}
+                onClick={() => searchCep(customization.storeLocation?.cep || '')}
+                className="w-full sm:w-auto"
+              >
+                <Search className="w-4 h-4 mr-1.5" />
+                Buscar CEP
+              </Button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Logradouro / Rua">
                 <Input
-                  value={customization.storeLocation?.cep || ''}
+                  value={customization.storeLocation?.street || ''}
+                  disabled={customization.storeLocation?.enabled === false}
                   onChange={(e) => {
-                    const raw = e.target.value;
-                    const loc = { ...(customization.storeLocation || {}), cep: raw };
-                    setCustomization({ ...customization, storeLocation: loc });
-                    if (raw.replace(/\D/g, '').length === 8) {
-                      searchCep(raw);
-                    }
+                    const loc = { ...(customization.storeLocation || {}), street: e.target.value };
+                    const numPart = loc.number ? `, ${loc.number}` : '';
+                    const formatted = `${loc.street}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state || ''}`;
+                    setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
                   }}
-                  placeholder="01424-002"
+                  placeholder="Ex: Alameda Lorena"
+                />
+              </Field>
+
+              <Field label="Número">
+                <Input
+                  value={customization.storeLocation?.number || ''}
+                  disabled={customization.storeLocation?.enabled === false}
+                  onChange={(e) => {
+                    const loc = { ...(customization.storeLocation || {}), number: e.target.value };
+                    const numPart = loc.number ? `, ${loc.number}` : '';
+                    const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state || ''}`;
+                    setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
+                  }}
+                  placeholder="Ex: 1420"
+                />
+              </Field>
+
+              <Field label="Complemento">
+                <Input
+                  value={customization.storeLocation?.complement || ''}
+                  disabled={customization.storeLocation?.enabled === false}
+                  onChange={(e) => {
+                    const loc = { ...(customization.storeLocation || {}), complement: e.target.value };
+                    setCustomization({ ...customization, storeLocation: loc });
+                  }}
+                  placeholder="Ex: Loja Jardins"
+                />
+              </Field>
+
+              <Field label="Bairro">
+                <Input
+                  value={customization.storeLocation?.neighborhood || ''}
+                  disabled={customization.storeLocation?.enabled === false}
+                  onChange={(e) => {
+                    const loc = { ...(customization.storeLocation || {}), neighborhood: e.target.value };
+                    const numPart = loc.number ? `, ${loc.number}` : '';
+                    const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood}, ${loc.city || ''}/${loc.state || ''}`;
+                    setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
+                  }}
+                  placeholder="Ex: Jardins"
+                />
+              </Field>
+
+              <Field label="Cidade">
+                <Input
+                  value={customization.storeLocation?.city || ''}
+                  disabled={customization.storeLocation?.enabled === false}
+                  onChange={(e) => {
+                    const loc = { ...(customization.storeLocation || {}), city: e.target.value };
+                    const numPart = loc.number ? `, ${loc.number}` : '';
+                    const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city}/${loc.state || ''}`;
+                    setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
+                  }}
+                  placeholder="Ex: São Paulo"
+                />
+              </Field>
+
+              <Field label="Estado (UF)">
+                <Input
+                  value={customization.storeLocation?.state || ''}
+                  disabled={customization.storeLocation?.enabled === false}
+                  onChange={(e) => {
+                    const loc = { ...(customization.storeLocation || {}), state: e.target.value.toUpperCase().slice(0, 2) };
+                    const numPart = loc.number ? `, ${loc.number}` : '';
+                    const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state}`;
+                    setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
+                  }}
+                  placeholder="Ex: SP"
                 />
               </Field>
             </div>
-            <Button
-              variant="subtle"
-              loading={cepLoading}
-              onClick={() => searchCep(customization.storeLocation?.cep || '')}
-              className="w-full sm:w-auto"
-            >
-              <Search className="w-4 h-4 mr-1.5" />
-              Buscar CEP
-            </Button>
-          </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Logradouro / Rua">
+            <Field label="Endereço Formatado Completo (Exibido aos Clientes)">
               <Input
-                value={customization.storeLocation?.street || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), street: e.target.value };
-                  const numPart = loc.number ? `, ${loc.number}` : '';
-                  const formatted = `${loc.street}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state || ''}`;
-                  setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
-                }}
-                placeholder="Ex: Alameda Lorena"
-              />
-            </Field>
-
-            <Field label="Número">
-              <Input
-                value={customization.storeLocation?.number || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), number: e.target.value };
-                  const numPart = loc.number ? `, ${loc.number}` : '';
-                  const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state || ''}`;
-                  setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
-                }}
-                placeholder="Ex: 1420"
-              />
-            </Field>
-
-            <Field label="Complemento">
-              <Input
-                value={customization.storeLocation?.complement || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), complement: e.target.value };
-                  setCustomization({ ...customization, storeLocation: loc });
-                }}
-                placeholder="Ex: Loja Jardins"
-              />
-            </Field>
-
-            <Field label="Bairro">
-              <Input
-                value={customization.storeLocation?.neighborhood || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), neighborhood: e.target.value };
-                  const numPart = loc.number ? `, ${loc.number}` : '';
-                  const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood}, ${loc.city || ''}/${loc.state || ''}`;
-                  setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
-                }}
-                placeholder="Ex: Jardins"
-              />
-            </Field>
-
-            <Field label="Cidade">
-              <Input
-                value={customization.storeLocation?.city || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), city: e.target.value };
-                  const numPart = loc.number ? `, ${loc.number}` : '';
-                  const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city}/${loc.state || ''}`;
-                  setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
-                }}
-                placeholder="Ex: São Paulo"
-              />
-            </Field>
-
-            <Field label="Estado (UF)">
-              <Input
-                value={customization.storeLocation?.state || ''}
-                onChange={(e) => {
-                  const loc = { ...(customization.storeLocation || {}), state: e.target.value.toUpperCase().slice(0, 2) };
-                  const numPart = loc.number ? `, ${loc.number}` : '';
-                  const formatted = `${loc.street || ''}${numPart} — ${loc.neighborhood || ''}, ${loc.city || ''}/${loc.state}`;
-                  setCustomization({ ...customization, storeLocation: loc, addressDisplay: formatted });
-                }}
-                placeholder="Ex: SP"
+                value={customization.addressDisplay || ''}
+                disabled={customization.storeLocation?.enabled === false}
+                onChange={(e) => setCustomization({ ...customization, addressDisplay: e.target.value })}
+                placeholder="Ex: Alameda Lorena, 1420 — Jardins, São Paulo/SP"
               />
             </Field>
           </div>
-
-          <Field label="Endereço Formatado Completo (Exibido aos Clientes)">
-            <Input
-              value={customization.addressDisplay || ''}
-              onChange={(e) => setCustomization({ ...customization, addressDisplay: e.target.value })}
-              placeholder="Ex: Alameda Lorena, 1420 — Jardins, São Paulo/SP"
-            />
-          </Field>
 
           <Button variant="primary" loading={busy} onClick={() => save('customization')}>
-            Salvar Localização Física
+            Salvar Localização Física & Modo
           </Button>
         </div>
       </Card>

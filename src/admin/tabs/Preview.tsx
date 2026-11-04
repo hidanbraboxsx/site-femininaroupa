@@ -11,7 +11,11 @@ import {
   Signal, 
   Lock,
   Sparkles,
-  Maximize2
+  Maximize2,
+  RefreshCw,
+  AlertCircle,
+  Eye,
+  CheckCircle2
 } from 'lucide-react';
 import { Button, Card, Badge, cn } from '../ui';
 
@@ -21,20 +25,44 @@ export function PreviewTab() {
   const [device, setDevice] = useState<DeviceMode>('mobile');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeTimeout, setIframeTimeout] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Determina a URL da loja baseada no host atual (porta 3000)
-  const storeUrl = typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:3000`
-    : 'http://localhost:3000';
+  // Detecta o melhor endereço da loja para evitar bloqueios de IPv6 / CORS
+  const isWindow = typeof window !== 'undefined';
+  const isPort3000 = isWindow && window.location.port === '3000';
+  const currentHost = isWindow ? window.location.hostname : 'localhost';
+  const ipv4Host = currentHost === 'localhost' ? '127.0.0.1' : currentHost;
+  const protocol = isWindow ? window.location.protocol : 'http:';
+
+  // Opções de rotas com fallback
+  const directRelative = '/';
+  const ipv4Url = `${protocol}//${ipv4Host}:3000/`;
+  const localhostUrl = `${protocol}//localhost:3000/`;
+
+  const defaultUrl = isPort3000 ? directRelative : ipv4Url;
+  const [selectedUrl, setSelectedUrl] = useState<string>(defaultUrl);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    setIframeLoaded(false);
+    setIframeTimeout(false);
     setIframeKey((prev) => prev + 1);
     setTimeout(() => setIsRefreshing(false), 600);
   };
 
-  // Escuta eventos de atualização da loja (quando o admin altera algo)
+  // Watchdog de carregamento
+  useEffect(() => {
+    setIframeLoaded(false);
+    setIframeTimeout(false);
+    const timer = setTimeout(() => {
+      setIframeTimeout(true);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [iframeKey, selectedUrl]);
+
+  // Escuta eventos de atualização da loja disparados no painel
   useEffect(() => {
     const handleStoreChange = () => {
       setIframeKey((prev) => prev + 1);
@@ -62,7 +90,7 @@ export function PreviewTab() {
               </span>
             </div>
             <p className="text-xs text-[var(--admin-text-muted)]">
-              Visualização idêntica à do lead em tempo real com todas as alterações do catálogo e estoque
+              Visualização idêntica à do lead em tempo real com todas as alterações do catálogo, estoque e banners
             </p>
           </div>
         </div>
@@ -75,7 +103,7 @@ export function PreviewTab() {
               type="button"
               onClick={() => setDevice('mobile')}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer',
                 device === 'mobile'
                   ? 'bg-rose-500 text-white shadow-xs font-semibold'
                   : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text-main)]'
@@ -89,7 +117,7 @@ export function PreviewTab() {
               type="button"
               onClick={() => setDevice('tablet')}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer',
                 device === 'tablet'
                   ? 'bg-rose-500 text-white shadow-xs font-semibold'
                   : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text-main)]'
@@ -103,7 +131,7 @@ export function PreviewTab() {
               type="button"
               onClick={() => setDevice('desktop')}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer',
                 device === 'desktop'
                   ? 'bg-rose-500 text-white shadow-xs font-semibold'
                   : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text-main)]'
@@ -113,6 +141,31 @@ export function PreviewTab() {
               <Monitor className="h-3.5 w-3.5" />
               <span>Computador</span>
             </button>
+          </div>
+
+          {/* Seletor de Rota / Origem (Para ambientes de teste) */}
+          <div className="hidden md:flex items-center rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-2 py-1 text-xs">
+            <span className="text-[10px] text-stone-500 mr-1.5 uppercase font-mono">Rota:</span>
+            <select
+              value={selectedUrl}
+              onChange={(e) => {
+                setSelectedUrl(e.target.value);
+                setIframeKey((prev) => prev + 1);
+              }}
+              className="bg-transparent text-stone-300 text-xs focus:outline-none cursor-pointer"
+            >
+              <option value={defaultUrl} className="bg-stone-900 text-stone-200">
+                {isPort3000 ? 'Origem Local Direta (/)' : `Porta 3000 (${ipv4Host})`}
+              </option>
+              {!isPort3000 && (
+                <option value={localhostUrl} className="bg-stone-900 text-stone-200">
+                  localhost:3000
+                </option>
+              )}
+              <option value={directRelative} className="bg-stone-900 text-stone-200">
+                Relativa (/)
+              </option>
+            </select>
           </div>
 
           {/* Botão de Atualizar */}
@@ -128,7 +181,7 @@ export function PreviewTab() {
 
           {/* Abrir em Nova Aba */}
           <a
-            href={storeUrl}
+            href={selectedUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-input-bg)] px-3 py-1.5 text-xs font-medium text-[var(--admin-text-main)] hover:bg-[var(--admin-item-hover)] transition-colors shadow-2xs"
@@ -141,7 +194,7 @@ export function PreviewTab() {
       </div>
 
       {/* Área Central de Visualização */}
-      <div className="flex justify-center items-start min-h-[750px] p-2 sm:p-6 rounded-2xl bg-gradient-to-b from-[#0a0a0e] to-[#121218] border border-[var(--admin-border)] overflow-x-auto shadow-inner">
+      <div className="flex justify-center items-start min-h-[780px] p-2 sm:p-6 rounded-2xl bg-gradient-to-b from-[#0a0a0e] to-[#121218] border border-[var(--admin-border)] overflow-x-auto shadow-inner relative">
         {device === 'mobile' && (
           /* MOCKUP DE CELULAR REALISTA (iPhone Style 390x844) */
           <div className="flex flex-col items-center">
@@ -161,13 +214,49 @@ export function PreviewTab() {
                 </div>
               </div>
 
-              {/* Tela do Celular (Iframe) */}
-              <div className="relative flex-1 w-full rounded-[36px] overflow-hidden bg-white shadow-inner">
+              {/* Tela do Celular (Iframe com Loading Skeleton) */}
+              <div className="relative flex-1 w-full rounded-[36px] overflow-hidden bg-[#FFF9FA] shadow-inner">
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#FFF9FA] p-6 text-center">
+                    <div className="h-10 w-10 rounded-full border-3 border-rose-200 border-t-rose-500 animate-spin mb-3" />
+                    <p className="text-xs font-semibold text-stone-800">Carregando Vitrine ao Vivo...</p>
+                    <p className="text-[10px] text-stone-500 mt-1 max-w-[200px]">
+                      Conectando à loja Flor de Seda em tempo real
+                    </p>
+                    {iframeTimeout && !iframeLoaded && (
+                      <div className="mt-4 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[10px] text-rose-800">
+                        <p className="font-semibold mb-1">Demorando para responder?</p>
+                        <div className="flex gap-1.5 justify-center mt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedUrl(selectedUrl === ipv4Url ? localhostUrl : ipv4Url);
+                              setIframeKey((k) => k + 1);
+                            }}
+                            className="px-2 py-1 rounded bg-rose-500 text-white font-medium"
+                          >
+                            Alternar Rota
+                          </button>
+                          <a
+                            href={selectedUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2 py-1 rounded bg-stone-200 text-stone-700 font-medium"
+                          >
+                            Abrir Direto
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <iframe
                   key={iframeKey}
                   ref={iframeRef}
-                  src={storeUrl}
+                  src={selectedUrl}
                   title="Preview da Loja Mobile"
+                  onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0 select-auto"
                 />
               </div>
@@ -190,12 +279,19 @@ export function PreviewTab() {
               <div className="h-5 flex items-center justify-center mb-1">
                 <div className="w-2 h-2 rounded-full bg-stone-700" />
               </div>
-              <div className="relative flex-1 w-full rounded-[24px] overflow-hidden bg-white shadow-inner">
+              <div className="relative flex-1 w-full rounded-[24px] overflow-hidden bg-[#FFF9FA] shadow-inner">
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#FFF9FA] p-6 text-center">
+                    <div className="h-10 w-10 rounded-full border-3 border-rose-200 border-t-rose-500 animate-spin mb-3" />
+                    <p className="text-xs font-semibold text-stone-800">Carregando Vitrine Tablet...</p>
+                  </div>
+                )}
                 <iframe
                   key={iframeKey}
                   ref={iframeRef}
-                  src={storeUrl}
+                  src={selectedUrl}
                   title="Preview da Loja Tablet"
+                  onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0"
                 />
               </div>
@@ -221,7 +317,7 @@ export function PreviewTab() {
                 {/* Barra de URL com SSL Lock */}
                 <div className="flex-1 max-w-lg h-7 rounded-lg bg-black/40 border border-white/10 px-3 flex items-center gap-2 text-xs text-stone-300 font-mono">
                   <Lock className="h-3 w-3 text-emerald-400" />
-                  <span className="truncate">{storeUrl}</span>
+                  <span className="truncate">{selectedUrl}</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-[10px] text-stone-400 font-medium">
@@ -231,12 +327,19 @@ export function PreviewTab() {
               </div>
 
               {/* Conteúdo Desktop (Iframe) */}
-              <div className="relative flex-1 w-full bg-white">
+              <div className="relative flex-1 w-full bg-[#FFF9FA]">
+                {!iframeLoaded && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#FFF9FA] p-6 text-center">
+                    <div className="h-10 w-10 rounded-full border-3 border-rose-200 border-t-rose-500 animate-spin mb-3" />
+                    <p className="text-xs font-semibold text-stone-800">Carregando Vitrine Desktop...</p>
+                  </div>
+                )}
                 <iframe
                   key={iframeKey}
                   ref={iframeRef}
-                  src={storeUrl}
+                  src={selectedUrl}
                   title="Preview da Loja Computador"
+                  onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0"
                 />
               </div>
@@ -250,4 +353,3 @@ export function PreviewTab() {
     </div>
   );
 }
-

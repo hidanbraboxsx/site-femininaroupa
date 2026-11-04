@@ -213,6 +213,17 @@ export interface StoreCustomizationSettings {
   supportEmail: string;
   businessHours: string;
   addressDisplay: string;
+  isPhysicalStore?: boolean;
+  storeLocation?: {
+    enabled?: boolean;
+    cep: string;
+    street: string;
+    number: string;
+    complement?: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  };
   greetingMessage: string;
 
   // Colors

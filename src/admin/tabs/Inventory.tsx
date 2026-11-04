@@ -1083,7 +1083,8 @@ export function CouponsTab({ liveKey }: { liveKey: number }) {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Novo cupom"
+        title="Novo cupom de desconto"
+        subtitle="crie cupons inteligentes com validação automática de regras e limite de usos"
         footer={
           <>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -1091,21 +1092,132 @@ export function CouponsTab({ liveKey }: { liveKey: number }) {
           </>
         }
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Código"><Input value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value.toUpperCase() })} placeholder="BEMVINDA10" /></Field>
-          <Field label="Tipo">
-            <Select value={form.discountType} onChange={(event) => setForm({ ...form, discountType: event.target.value })}>
-              <option value="percentage">Percentual</option>
-              <option value="fixed">Valor fixo</option>
-            </Select>
-          </Field>
-          <Field label={form.discountType === 'percentage' ? 'Desconto (%)' : 'Desconto (R$)'}>
-            <Input type="number" value={form.discountValue} onChange={(event) => setForm({ ...form, discountValue: event.target.value })} />
-          </Field>
-          <Field label="Compra mínima (R$)"><Input type="number" value={form.minPurchase} onChange={(event) => setForm({ ...form, minPurchase: event.target.value })} /></Field>
-          <Field label="Limite de usos"><Input type="number" value={form.maxUses} onChange={(event) => setForm({ ...form, maxUses: event.target.value })} /></Field>
-          <Field label="Válido até"><Input type="date" value={form.validUntil} onChange={(event) => setForm({ ...form, validUntil: event.target.value })} /></Field>
-          <div className="sm:col-span-2"><Field label="Descrição"><Input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></Field></div>
+        <div className="space-y-4">
+          {/* Exemplos Prontos Interativos */}
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
+            <p className="text-[11px] font-semibold text-rose-300 mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+              Exemplos Prontos · Clique para Preencher:
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                {
+                  code: 'BEMVINDA10',
+                  label: 'Primeira Compra 10%',
+                  discountType: 'percentage',
+                  discountValue: '10',
+                  minPurchase: '150',
+                  maxUses: '500',
+                  description: '10% de desconto de boas-vindas para novos clientes'
+                },
+                {
+                  code: 'FRETEGRATIS',
+                  label: 'Frete Grátis (R$ 25)',
+                  discountType: 'fixed',
+                  discountValue: '25',
+                  minPurchase: '199',
+                  maxUses: '200',
+                  description: 'Abatimento do frete para compras acima de R$ 199'
+                },
+                {
+                  code: 'VIP50',
+                  label: 'Cliente VIP (R$ 50 OFF)',
+                  discountType: 'fixed',
+                  discountValue: '50',
+                  minPurchase: '300',
+                  maxUses: '100',
+                  description: 'Desconto especial de R$ 50 para pedidos VIP'
+                },
+                {
+                  code: 'OFF20',
+                  label: '20% OFF Especial',
+                  discountType: 'percentage',
+                  discountValue: '20',
+                  minPurchase: '250',
+                  maxUses: '150',
+                  description: '20% de desconto em vestidos e peças selecionadas'
+                }
+              ].map((preset) => (
+                <button
+                  key={preset.code}
+                  type="button"
+                  onClick={() => {
+                    const thirtyDays = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+                    setForm({
+                      code: preset.code,
+                      discountType: preset.discountType,
+                      discountValue: preset.discountValue,
+                      minPurchase: preset.minPurchase,
+                      maxUses: preset.maxUses,
+                      validUntil: thirtyDays,
+                      description: preset.description
+                    });
+                  }}
+                  className={cn(
+                    'px-2 py-1 rounded-lg text-xs font-mono font-medium border transition-all cursor-pointer',
+                    form.code === preset.code
+                      ? 'bg-rose-500 text-white border-rose-400 font-bold'
+                      : 'bg-black/40 text-stone-300 border-white/10 hover:border-rose-400/50 hover:text-white'
+                  )}
+                >
+                  {preset.code} · <span className="text-[10px] opacity-80">{preset.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Ticket Preview do Cupom no Checkout */}
+          <div className="rounded-xl border border-dashed border-rose-500/30 bg-black/40 p-3">
+            <div className="flex items-center justify-between text-[10px] text-stone-400 mb-2 border-b border-white/5 pb-1">
+              <span className="flex items-center gap-1 font-semibold text-rose-300">
+                <Tag className="w-3 h-3 text-rose-400" />
+                Preview do Cupom no Checkout
+              </span>
+              <span className="font-mono text-emerald-400 text-[10px]">Visão do Lead</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white font-mono font-bold text-xs shadow-md">
+                  {form.discountType === 'percentage' ? (form.discountValue || '0') + '%' : 'R$'}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-xs text-stone-100">
+                      {form.code || 'CODIGO'}
+                    </span>
+                    <span className="rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.2 text-[10px] font-semibold">
+                      {form.discountType === 'percentage'
+                        ? (form.discountValue || '0') + '% OFF'
+                        : 'R$ ' + (form.discountValue || '0') + ',00 OFF'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-400">
+                    {form.description || 'Desconto aplicado no carrinho'}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right text-[10px] text-stone-400 font-mono">
+                <div>Mínimo: R$ {form.minPurchase || '0'},00</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Código"><Input value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value.toUpperCase().replace(/\s+/g, '') })} placeholder="BEMVINDA10" /></Field>
+            <Field label="Tipo">
+              <Select value={form.discountType} onChange={(event) => setForm({ ...form, discountType: event.target.value })}>
+                <option value="percentage">Percentual (%)</option>
+                <option value="fixed">Valor fixo (R$)</option>
+              </Select>
+            </Field>
+            <Field label={form.discountType === 'percentage' ? 'Desconto (%)' : 'Desconto (R$)'}>
+              <Input type="number" value={form.discountValue} onChange={(event) => setForm({ ...form, discountValue: event.target.value })} placeholder="10" />
+            </Field>
+            <Field label="Compra mínima (R$)"><Input type="number" value={form.minPurchase} onChange={(event) => setForm({ ...form, minPurchase: event.target.value })} placeholder="150" /></Field>
+            <Field label="Limite de usos"><Input type="number" value={form.maxUses} onChange={(event) => setForm({ ...form, maxUses: event.target.value })} placeholder="500" /></Field>
+            <Field label="Válido até"><Input type="date" value={form.validUntil} onChange={(event) => setForm({ ...form, validUntil: event.target.value })} /></Field>
+            <div className="sm:col-span-2"><Field label="Descrição"><Input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Ex: 10% de desconto para novos clientes" /></Field></div>
+          </div>
         </div>
       </Modal>
     </div>
