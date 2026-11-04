@@ -162,6 +162,7 @@ export const shopApi = {
       city: string;
       state: string;
     };
+    addresses?: CustomerAddress[];
     currentPassword?: string;
     newPassword?: string;
   }) => request<{ ok: boolean; customer: CustomerSession }>(`${PUBLIC_BASE}/auth/me`, {
@@ -179,6 +180,19 @@ export const shopApi = {
   health: () => request<{ ok: boolean; uptimeSeconds: number }>(`${PUBLIC_BASE}/health`)
 };
 
+export interface CustomerAddress {
+  id?: string;
+  label?: string;
+  isPrimary?: boolean;
+  cep: string;
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
+
 export interface CustomerSession {
   id: string;
   name: string;
@@ -190,15 +204,7 @@ export interface CustomerSession {
   ordersCount: number;
   totalSpent: number;
   wishlist?: string[];
-  addresses?: Array<{
-    cep: string;
-    street: string;
-    number: string;
-    complement?: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-  }>;
+  addresses?: CustomerAddress[];
 }
 
 /* ------------------------ Painel (caminho cifrado) ------------------------ */

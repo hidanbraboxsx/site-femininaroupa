@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Product, CartItem, Coupon, Order, Banner, Review, ProductColor, UserBodyProfile, LeadInfo } from '../types';
-import { shopApi, customerToken, ApiError, type CustomerSession, type StorePayload } from '../lib/api';
+import { shopApi, customerToken, ApiError, type CustomerSession, type CustomerAddress, type StorePayload } from '../lib/api';
 import { applyStoreMeta, setupAntiCopyShield } from '../lib/antiCopyShield';
 
 /* ------------------------------------------------------------------ *
@@ -128,6 +128,7 @@ interface StoreContextType {
       city: string;
       state: string;
     };
+    addresses?: CustomerAddress[];
     currentPassword?: string;
     newPassword?: string;
   }) => Promise<{ ok: boolean; error?: string }>;

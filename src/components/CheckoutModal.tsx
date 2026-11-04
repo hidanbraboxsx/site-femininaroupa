@@ -29,7 +29,11 @@ import {
   ArrowLeft,
   Printer,
   User,
-  MessageCircle
+  MessageCircle,
+  MapPin,
+  Star,
+  Home,
+  Briefcase
 } from 'lucide-react';
 
 export const CheckoutModal: React.FC = () => {
@@ -94,12 +98,20 @@ export const CheckoutModal: React.FC = () => {
   // Sync customer user if available
   useEffect(() => {
     if (customerUser) {
+      const primaryAddr = customerUser.addresses?.find(a => a.isPrimary) || customerUser.addresses?.[0];
       setLead(prev => ({
         ...prev,
         fullName: prev.fullName || customerUser.name,
         email: prev.email || customerUser.email,
         phone: prev.phone || customerUser.phone,
-        cpf: prev.cpf || customerUser.cpf
+        cpf: prev.cpf || customerUser.cpf,
+        cep: prev.cep || (primaryAddr?.cep ? formatCEP(primaryAddr.cep) : ''),
+        street: prev.street || (primaryAddr?.street || ''),
+        number: prev.number || (primaryAddr?.number || ''),
+        complement: prev.complement || (primaryAddr?.complement || ''),
+        neighborhood: prev.neighborhood || (primaryAddr?.neighborhood || ''),
+        city: prev.city || (primaryAddr?.city || ''),
+        state: prev.state || (primaryAddr?.state ? primaryAddr.state.toUpperCase() : '')
       }));
     }
   }, [customerUser]);
@@ -223,6 +235,23 @@ export const CheckoutModal: React.FC = () => {
         });
       }
     }
+  };
+
+  const handleSelectSavedAddress = (addr: any) => {
+    setLead(prev => ({
+      ...prev,
+      cep: formatCEP(addr.cep),
+      street: addr.street,
+      number: addr.number || '',
+      complement: addr.complement || '',
+      neighborhood: addr.neighborhood,
+      city: addr.city,
+      state: String(addr.state || '').toUpperCase()
+    }));
+    setErrors(prev => {
+      const { cep, street, number, neighborhood, city, state, ...rest } = prev;
+      return rest;
+    });
   };
 
   // Finalize order — o total é recalculado no servidor
@@ -444,9 +473,66 @@ export const CheckoutModal: React.FC = () => {
                   Endereço de Entrega & Modalidade de Frete
                 </h3>
                 <p className="text-xs text-stone-500 font-light mt-1">
-                  Digite seu CEP para preenchimento automático inteligente.
+                  Selecione um endereço salvo ou digite o CEP para preenchimento automático.
                 </p>
               </div>
+
+              {/* Seletor de Endereço Salvo para Compra Rápida com 1 clique */}
+              {customerUser?.addresses && customerUser.addresses.length > 0 && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-50/80 via-white to-pink-50/80 border border-rose-200/90 shadow-2xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-[#DC7898]" />
+                      <span>Seus Endereços Salvos (1 Clique para Selecionar)</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100/70 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      ★ Compra Expressa
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {customerUser.addresses.map((addr: any, idx: number) => {
+                      const isSelected = lead.cep.replace(/\D/g, '') === addr.cep.replace(/\D/g, '') &&
+                        lead.street.trim().toLowerCase() === addr.street.trim().toLowerCase() &&
+                        lead.number.trim() === addr.number.trim();
+                      return (
+                        <button
+                          key={addr.id || idx}
+                          type="button"
+                          onClick={() => handleSelectSavedAddress(addr)}
+                          className={`p-3 rounded-xl text-left border transition-all cursor-pointer relative ${
+                            isSelected
+                              ? 'bg-rose-50 border-[#DC7898] ring-2 ring-rose-200/80 shadow-xs'
+                              : 'bg-white border-rose-100 hover:border-rose-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-800 text-[10px] font-bold">
+                              {addr.label || 'Endereço'}
+                            </span>
+                            {addr.isPrimary && (
+                              <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">
+                                Principal
+                              </span>
+                            )}
+                            {isSelected && (
+                              <span className="text-[10px] font-bold text-[#DC7898] flex items-center gap-0.5">
+                                <Check className="w-3 h-3" /> Selecionado
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs font-semibold text-stone-800 line-clamp-1">
+                            {addr.street}, {addr.number} {addr.complement ? `· ${addr.complement}` : ''}
+                          </p>
+                          <p className="text-[11px] text-stone-500 font-light">
+                            {addr.neighborhood} · {addr.city}/{addr.state} · CEP {formatCEP(addr.cep)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

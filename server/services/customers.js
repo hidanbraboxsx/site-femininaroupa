@@ -180,8 +180,24 @@ export function updateCustomerProfile(customerId, input) {
       record.credentials = newCredentials;
     }
 
-    if (input.address && typeof input.address === 'object' && input.address.street) {
+    if (Array.isArray(input.addresses)) {
+      record.addresses = input.addresses.map((a, idx) => ({
+        id: a.id || ('addr-' + Date.now() + '-' + idx),
+        label: a.label || (a.isPrimary ? 'Principal' : 'Entrega'),
+        isPrimary: Boolean(a.isPrimary !== undefined ? a.isPrimary : idx === 0),
+        cep: String(a.cep || '').trim(),
+        street: String(a.street || '').trim(),
+        number: String(a.number || '').trim(),
+        complement: String(a.complement || '').trim(),
+        neighborhood: String(a.neighborhood || '').trim(),
+        city: String(a.city || '').trim(),
+        state: String(a.state || '').trim().toUpperCase()
+      }));
+    } else if (input.address && typeof input.address === 'object' && input.address.street) {
       const addr = {
+        id: input.address.id || ('addr-' + Date.now()),
+        label: input.address.label || 'Principal',
+        isPrimary: true,
         street: String(input.address.street).trim(),
         number: String(input.address.number || '').trim(),
         complement: String(input.address.complement || '').trim(),
