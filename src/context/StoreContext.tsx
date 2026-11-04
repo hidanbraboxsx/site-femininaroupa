@@ -56,7 +56,7 @@ export interface StoreCustomization {
   palettePreset: string;
   titleFont: string;
   bodyFont: string;
-  socials: Record<string, { platform: string; handle: string; url: string }>;
+  socials: Record<string, { platform: string; handle: string; url: string; active?: boolean }>;
   categories?: CategorySetting[];
 }
 

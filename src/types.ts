@@ -199,6 +199,7 @@ export interface SocialAccountSetting {
   handle: string;
   url: string;
   isVerified: boolean;
+  active?: boolean;
   lastChecked?: string;
   followerCountEstimate?: string;
   notes?: string;

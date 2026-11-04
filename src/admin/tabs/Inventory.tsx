@@ -2,6 +2,9 @@ const SAFE_IMG_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDov
 import React, { useState } from 'react';
 import {
   ArrowDownLeft,
+  ArrowRight,
+  Monitor,
+  Smartphone,
   ArrowUpRight,
   Boxes,
   Eye,

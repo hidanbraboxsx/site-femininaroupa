@@ -1270,8 +1270,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                   )}>
                     {customization.socials?.instagram?.active !== false ? 'Ativo' : 'Desativado'}
                   </span>
-                  <Toggle
-                    checked={customization.socials?.instagram?.active !== false}
+                  <Toggle label="Ativar no site" checked={customization.socials?.instagram?.active !== false}
                     onChange={(checked) => {
                       setCustomization({
                         ...customization,
@@ -1351,8 +1350,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                   )}>
                     {customization.socials?.tiktok?.active !== false ? 'Ativo' : 'Desativado'}
                   </span>
-                  <Toggle
-                    checked={customization.socials?.tiktok?.active !== false}
+                  <Toggle label="Ativar no site" checked={customization.socials?.tiktok?.active !== false}
                     onChange={(checked) => {
                       setCustomization({
                         ...customization,
@@ -1432,8 +1430,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                   )}>
                     {customization.socials?.facebook?.active !== false ? 'Ativo' : 'Desativado'}
                   </span>
-                  <Toggle
-                    checked={customization.socials?.facebook?.active !== false}
+                  <Toggle label="Ativar no site" checked={customization.socials?.facebook?.active !== false}
                     onChange={(checked) => {
                       setCustomization({
                         ...customization,
@@ -1513,8 +1510,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                   )}>
                     {customization.socials?.pinterest?.active !== false ? 'Ativo' : 'Desativado'}
                   </span>
-                  <Toggle
-                    checked={customization.socials?.pinterest?.active !== false}
+                  <Toggle label="Ativar no site" checked={customization.socials?.pinterest?.active !== false}
                     onChange={(checked) => {
                       setCustomization({
                         ...customization,
@@ -1594,8 +1590,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                   )}>
                     {customization.socials?.whatsapp?.active !== false ? 'Ativo' : 'Desativado'}
                   </span>
-                  <Toggle
-                    checked={customization.socials?.whatsapp?.active !== false}
+                  <Toggle label="Ativar no site" checked={customization.socials?.whatsapp?.active !== false}
                     onChange={(checked) => {
                       setCustomization({
                         ...customization,
