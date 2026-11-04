@@ -1109,24 +1109,94 @@ export function CouponsTab({ liveKey }: { liveKey: number }) {
   );
 }
 
-/* ------------------------------------------------------------------ *
- * Banners
- * ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* Banners da Vitrine com Edição Avançada e Preview em Tempo Real */
+/* ------------------------------------------------------------------ */
 
 export function BannersTab({ liveKey }: { liveKey: number }) {
   const { data, loading, reload } = useLoad(() => adminApi.banners(), [liveKey]);
   const { busy, run } = useAction();
   const toast = useToast();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ badge: '', title: '', subtitle: '', ctaText: 'Ver coleção', imageUrl: '', categoryFilter: 'Vestidos', active: true });
+  const [editing, setEditing] = useState<any>(null);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
-  async function create() {
+  const EMPTY_BANNER = {
+    badge: 'NOVA ESTAÇÃO',
+    title: 'Nova Coleção\nPrimavera',
+    subtitle: 'Peças delicadas para cada momento seu. Tecidos nobres, estampas autorais e caimento feito para valorizar sua feminilidade.',
+    ctaText: 'VER COLEÇÃO',
+    categoryFilter: 'Vestidos',
+    imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=80',
+    alignment: 'left' as 'left' | 'center' | 'right',
+    active: true
+  };
+
+  const [form, setForm] = useState<any>(EMPTY_BANNER);
+
+  function openCreate() {
+    setEditing(null);
+    setForm(EMPTY_BANNER);
+    setOpen(true);
+  }
+
+  function openEdit(banner: any) {
+    setEditing(banner);
+    setForm({
+      badge: banner.badge || '',
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      ctaText: banner.ctaText || 'VER COLEÇÃO',
+      categoryFilter: banner.categoryFilter || 'Vestidos',
+      imageUrl: banner.imageUrl || '',
+      alignment: banner.alignment || 'left',
+      active: banner.active !== false
+    });
+    setOpen(true);
+  }
+
+  async function saveBanner() {
+    if (!form.title.trim()) {
+      toast.push('Por favor, informe o título do banner.', 'error');
+      return;
+    }
+    const payload = {
+      badge: form.badge.trim(),
+      title: form.title.trim(),
+      subtitle: form.subtitle.trim(),
+      ctaText: form.ctaText.trim() || 'VER COLEÇÃO',
+      categoryFilter: form.categoryFilter.trim() || 'Vestidos',
+      imageUrl: form.imageUrl.trim(),
+      alignment: form.alignment || 'left',
+      active: Boolean(form.active)
+    };
+
     const result = await run(async () => {
-      await adminApi.createBanner({ ...form }); notifyStoreChange();
+      if (editing) {
+        await adminApi.updateBanner(editing.id, payload);
+      } else {
+        await adminApi.createBanner(payload);
+      }
+      notifyStoreChange();
       setOpen(false);
       await reload();
     });
-    toast.push(result.ok ? 'Banner criado.' : (result as any).error, result.ok ? 'success' : 'error');
+    toast.push(
+      result.ok
+        ? (editing ? 'Banner atualizado com sucesso!' : 'Novo banner publicado na vitrine!')
+        : (result as any).error,
+      result.ok ? 'success' : 'error'
+    );
+  }
+
+  async function removeBanner(banner: any) {
+    if (!window.confirm(`Deseja excluir o banner "${banner.title}" da vitrine?`)) return;
+    const result = await run(async () => {
+      await adminApi.deleteBanner(banner.id);
+      notifyStoreChange();
+      await reload();
+    });
+    toast.push(result.ok ? 'Banner removido.' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
   const banners = data?.banners || [];
@@ -1135,31 +1205,109 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
     <div className="space-y-4">
       <Card>
         <SectionTitle
-          title="Banners da vitrine"
-          subtitle="conteúdo exibido no carrossel da home"
-          action={<Button size="sm" variant="primary" icon={<Plus className="h-3.5 w-3.5" />} onClick={() => setOpen(true)}>Novo banner</Button>}
+          title="Banners da Vitrine"
+          subtitle="Carrossel nobre do topo da loja — personalize fotos, textos e botões com preview em tempo real"
+          action={
+            <Button size="sm" variant="primary" icon={<Plus className="h-3.5 w-3.5" />} onClick={openCreate}>
+              Novo banner
+            </Button>
+          }
         />
+
         {loading && banners.length === 0 ? (
           <Spinner />
         ) : banners.length === 0 ? (
-          <EmptyState title="Nenhum banner" description="O carrossel usa apenas conteúdo real cadastrado aqui." />
+          <EmptyState
+            title="Nenhum banner cadastrado"
+            description="Cadastre banners para dar vida ao topo da sua loja com imagens e títulos marcantes."
+          />
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {banners.map((banner) => (
-              <div key={banner.id} className="overflow-hidden rounded-xl border border-[#26262e]">
-                {banner.imageUrl ? <img referrerPolicy="no-referrer" src={banner.imageUrl} alt="" className="h-32 w-full object-cover" /> : null}
-                <div className="p-3">
-                  <div className="flex items-center justify-between">
-                    <Badge tone={banner.active ? 'good' : 'neutral'}>{banner.active ? 'ativo' : 'inativo'}</Badge>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={async () => { await adminApi.updateBanner(banner.id, { active: !banner.active }); notifyStoreChange(); await reload(); }}>Alternar</Button>
-                      <button className="rounded-lg p-1.5 text-stone-400 hover:bg-red-500/10 hover:text-red-300" onClick={async () => { await adminApi.deleteBanner(banner.id); notifyStoreChange(); await reload(); }}>
+              <div
+                key={banner.id}
+                className="group relative overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] shadow-sm hover:border-rose-500/40 transition-all"
+              >
+                {/* Imagem do Banner */}
+                <div className="relative h-44 w-full overflow-hidden bg-stone-900">
+                  {banner.imageUrl ? (
+                    <img
+                      referrerPolicy="no-referrer"
+                      src={banner.imageUrl}
+                      alt={banner.title}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-stone-500">
+                      <ImageIcon className="h-10 w-10 stroke-1" />
+                    </div>
+                  )}
+                  {/* Badge de Status */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+                    <Badge tone={banner.active ? 'good' : 'neutral'}>
+                      {banner.active ? '● No ar na loja' : '○ Pausado'}
+                    </Badge>
+                    {banner.badge ? (
+                      <span className="rounded-full bg-black/60 backdrop-blur border border-white/10 px-2.5 py-0.5 text-[10px] font-semibold text-rose-300">
+                        {banner.badge}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Conteúdo & Ações */}
+                <div className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-bold text-[var(--admin-text-main)] line-clamp-1">
+                        {banner.title}
+                      </h3>
+                      {banner.subtitle && (
+                        <p className="text-xs text-[var(--admin-text-muted)] line-clamp-2 mt-0.5 font-light">
+                          {banner.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-[var(--admin-border)] flex items-center justify-between">
+                    <span className="text-[11px] text-[var(--admin-text-subtle)] font-mono">
+                      CTA: {banner.ctaText || 'VER COLEÇÃO'} · {banner.categoryFilter || 'Vestidos'}
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        icon={<Pencil className="h-3 w-3 text-rose-400" />}
+                        onClick={() => openEdit(banner)}
+                        title="Editar textos, foto e configurações deste banner"
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={async () => {
+                          await adminApi.updateBanner(banner.id, { active: !banner.active });
+                          notifyStoreChange();
+                          await reload();
+                          toast.push(banner.active ? 'Banner pausado.' : 'Banner ativado!', 'success');
+                        }}
+                        title={banner.active ? 'Pausar exibição' : 'Ativar na loja'}
+                      >
+                        {banner.active ? 'Pausar' : 'Ativar'}
+                      </Button>
+                      <button
+                        type="button"
+                        className="rounded-lg p-2 text-stone-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                        onClick={() => removeBanner(banner)}
+                        title="Excluir este banner"
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-stone-200">{banner.title}</p>
-                  <p className="text-[11px] text-stone-500">{banner.subtitle}</p>
                 </div>
               </div>
             ))}
@@ -1167,31 +1315,243 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
         )}
       </Card>
 
+      {/* Modal Inteligente de Edição / Criação com Preview ao Vivo */}
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Novo banner"
+        title={editing ? 'Editar Banner do Topo' : 'Novo Banner para a Vitrine'}
+        subtitle="Configure a imagem, frases de destaque, botão e visualize exatamente como o lead verá no site em tempo real"
         wide
         footer={
           <>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button variant="primary" loading={busy} onClick={create} disabled={!form.title}>Criar</Button>
+            <Button variant="primary" loading={busy} onClick={saveBanner}>
+              {editing ? 'Salvar Alterações no Banner' : 'Publicar Banner'}
+            </Button>
           </>
         }
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Selo"><Input value={form.badge} onChange={(event) => setForm({ ...form, badge: event.target.value })} /></Field>
-          <Field label="Título"><Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></Field>
-          <div className="sm:col-span-2"><Field label="Subtítulo"><Input value={form.subtitle} onChange={(event) => setForm({ ...form, subtitle: event.target.value })} /></Field></div>
-          <Field label="Texto do botão"><Input value={form.ctaText} onChange={(event) => setForm({ ...form, ctaText: event.target.value })} /></Field>
-          <Field label="Categoria"><Input value={form.categoryFilter} onChange={(event) => setForm({ ...form, categoryFilter: event.target.value })} /></Field>
-          <div className="sm:col-span-2">
-            <ImageUploader
-              label="Imagem do Banner"
-              hint="Anexe o banner promocional do computador, arraste, cole print (Ctrl+V) ou coloque a URL"
-              value={form.imageUrl}
-              onChange={(val) => setForm({ ...form, imageUrl: val })}
-            />
+        <div className="grid gap-6 lg:grid-cols-12">
+          {/* Formulário (6 colunas) */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3">
+              <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 uppercase tracking-wider">
+                Textos do Banner
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Selo Superior (Badge)" hint="Ex: NOVA COLEÇÃO, EDIÇÃO LIMITADA">
+                  <Input
+                    value={form.badge}
+                    onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                    placeholder="NOVA COLEÇÃO"
+                  />
+                </Field>
+                <Field label="Filtro de Categoria" hint="Ex: Vestidos, Conjuntos, Todos">
+                  <Input
+                    value={form.categoryFilter}
+                    onChange={(e) => setForm({ ...form, categoryFilter: e.target.value })}
+                    placeholder="Vestidos"
+                  />
+                </Field>
+              </div>
+
+              <Field label="Título Principal *" hint="Dica: use enter ou \\n para quebrar a linha">
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Nova Coleção\nPrimavera"
+                />
+              </Field>
+
+              <Field label="Subtítulo Editorial">
+                <Input
+                  value={form.subtitle}
+                  onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+                  placeholder="Peças delicadas para cada momento seu. Tecidos nobres e caimento fluido."
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Texto do Botão (CTA)">
+                  <Input
+                    value={form.ctaText}
+                    onChange={(e) => setForm({ ...form, ctaText: e.target.value })}
+                    placeholder="VER COLEÇÃO"
+                  />
+                </Field>
+                <Field label="Alinhamento do Texto">
+                  <Select
+                    value={form.alignment}
+                    onChange={(e) => setForm({ ...form, alignment: e.target.value as any })}
+                  >
+                    <option value="left">Esquerda (Padrão)</option>
+                    <option value="center">Centralizado</option>
+                    <option value="right">Direita</option>
+                  </Select>
+                </Field>
+              </div>
+
+              <div className="pt-2">
+                <Toggle
+                  checked={form.active}
+                  onChange={(val) => setForm({ ...form, active: val })}
+                  label="Manter este banner ativo no carrossel da loja"
+                />
+              </div>
+            </div>
+
+            {/* Upload da Imagem do Banner */}
+            <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3">
+              <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 uppercase tracking-wider">
+                Imagem de Fundo do Banner
+              </p>
+              <ImageUploader
+                label="Anexar Imagem do Banner"
+                hint="Anexe fotos de alta resolução (recomendado 1800x600 px)"
+                value={form.imageUrl}
+                onChange={(val) => setForm({ ...form, imageUrl: val })}
+              />
+
+              {/* Sugestões de Fotos Nobres da Boutique */}
+              <div className="pt-2 border-t border-[var(--admin-border)]">
+                <p className="text-[11px] font-medium text-[var(--admin-text-subtle)] mb-2">
+                  Sugestões da Coleção Flor de Seda (Clique para aplicar):
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Primavera Chiffon', url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=80' },
+                    { label: 'Vestido Rosé Nobre', url: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=1800&q=80' },
+                    { label: 'Editorial Linho', url: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1800&q=80' }
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setForm({ ...form, imageUrl: preset.url })}
+                      className="group relative rounded-xl overflow-hidden border border-[var(--admin-border)] hover:border-rose-400 p-1 text-left bg-black/20 transition-all"
+                    >
+                      <img
+                        referrerPolicy="no-referrer"
+                        src={preset.url}
+                        alt=""
+                        className="h-12 w-full object-cover rounded-lg group-hover:scale-105 transition-transform"
+                      />
+                      <p className="text-[10px] text-stone-300 font-medium truncate mt-1 text-center">
+                        {preset.label}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Coluna da Direita: PREVIEW 100% REAL IDENTICO AO SITE DO LEAD (6 colunas) */}
+          <div className="lg:col-span-6 space-y-3">
+            <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-rose-400 uppercase tracking-wider">
+                <Eye className="h-4 w-4" />
+                Preview em Tempo Real (Visão do Lead)
+              </span>
+
+              {/* Alternador Desktop / Celular */}
+              <div className="flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-input-bg)] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('desktop')}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
+                    previewDevice === 'desktop' ? 'bg-rose-500 text-white font-semibold' : 'text-stone-400 hover:text-stone-200'
+                  )}
+                  title="Visão Desktop"
+                >
+                  <Monitor className="h-3 w-3" />
+                  <span>Desktop</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('mobile')}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
+                    previewDevice === 'mobile' ? 'bg-rose-500 text-white font-semibold' : 'text-stone-400 hover:text-stone-200'
+                  )}
+                  title="Visão Celular"
+                >
+                  <Smartphone className="h-3 w-3" />
+                  <span>Celular</span>
+                </button>
+              </div>
+            </div>
+
+            {/* MOCKUP DO BANNER DA HOME */}
+            <div
+              className={cn(
+                'relative mx-auto rounded-2xl overflow-hidden border border-rose-300/40 shadow-xl transition-all bg-[#F6E5E8]',
+                previewDevice === 'mobile' ? 'w-[320px] min-h-[360px]' : 'w-full min-h-[380px]'
+              )}
+            >
+              {/* Imagem de Fundo com Degradê Idêntico à Home */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  referrerPolicy="no-referrer"
+                  src={form.imageUrl || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=80'}
+                  alt=""
+                  className="w-full h-full object-cover object-right lg:object-center filter brightness-[0.96]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#F7E7EA] via-[#F7E7EA]/85 to-transparent sm:via-[#F7E7EA]/75" />
+              </div>
+
+              {/* Conteúdo Dinâmico */}
+              <div
+                className={cn(
+                  'relative z-10 flex flex-col justify-center h-full p-6',
+                  form.alignment === 'center'
+                    ? 'text-center items-center'
+                    : form.alignment === 'right'
+                      ? 'text-right items-end'
+                      : 'text-left items-start'
+                )}
+              >
+                {/* Badge com Coração */}
+                {form.badge && (
+                  <div className="inline-flex items-center gap-1.5 text-[#DC7898] text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase mb-2">
+                    <Heart className="w-3 h-3 fill-[#DC7898]" />
+                    <span>{form.badge}</span>
+                  </div>
+                )}
+
+                {/* Título com Fonte Serifada Nobre */}
+                <h2
+                  className={cn(
+                    'font-serif font-medium tracking-tight text-[#2D2427] leading-[1.15] mb-2 whitespace-pre-line',
+                    previewDevice === 'mobile' ? 'text-xl' : 'text-3xl'
+                  )}
+                >
+                  {form.title ? form.title.replace(/\\n/g, '\n') : 'Título do Banner'}
+                </h2>
+
+                {/* Subtítulo */}
+                {form.subtitle && (
+                  <p
+                    className={cn(
+                      'text-stone-700 font-light leading-relaxed mb-4 max-w-sm',
+                      previewDevice === 'mobile' ? 'text-[11px] line-clamp-3' : 'text-xs'
+                    )}
+                  >
+                    {form.subtitle}
+                  </p>
+                )}
+
+                {/* Botão CTA Rosa */}
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#DC7898] text-white text-xs font-semibold tracking-wider uppercase shadow-md hover:bg-[#c96282] transition-colors">
+                  <span>{form.ctaText || 'VER COLEÇÃO'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-stone-500 text-center font-mono pt-1">
+              {previewDevice === 'mobile' ? 'Simulação Tela de Smartphone' : 'Simulação Desktop Vitrine'} · 100% idêntico à loja
+            </p>
           </div>
         </div>
       </Modal>

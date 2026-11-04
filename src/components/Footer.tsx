@@ -134,7 +134,7 @@ export const Footer: React.FC = () => {
               >
                 <IconWhatsApp size={18} className="w-[18px] h-[18px] transition-transform group-hover:scale-110" />
               </a>
-              {tiktokUrl && (
+              {tiktokUrl && customization?.socials?.tiktok?.active !== false && (
                 <a
                   href={tiktokUrl}
                   target="_blank"
@@ -145,7 +145,7 @@ export const Footer: React.FC = () => {
                   <IconTikTok size={18} className="w-[18px] h-[18px] transition-transform group-hover:scale-110" />
                 </a>
               )}
-              {pinterestUrl && (
+              {pinterestUrl && customization?.socials?.pinterest?.active !== false && (
                 <a
                   href={pinterestUrl}
                   target="_blank"

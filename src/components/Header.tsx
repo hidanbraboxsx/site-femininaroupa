@@ -59,7 +59,7 @@ export const Header: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 w-full min-w-0">
           {/* Social Icons Dinâmicos configurados no Painel Admin */}
           <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-            {customization?.socials?.instagram?.url && (
+            {customization?.socials?.instagram?.url && customization?.socials?.instagram?.active !== false && (
               <a 
                 href={customization.socials.instagram.url} 
                 target="_blank" 
@@ -71,7 +71,7 @@ export const Header: React.FC = () => {
                 <Instagram className="w-3.5 h-3.5" />
               </a>
             )}
-            {customization?.socials?.facebook?.url && (
+            {customization?.socials?.facebook?.url && customization?.socials?.facebook?.active !== false && (
               <a 
                 href={customization.socials.facebook.url} 
                 target="_blank" 
@@ -83,7 +83,7 @@ export const Header: React.FC = () => {
                 <Facebook className="w-3.5 h-3.5" />
               </a>
             )}
-            {customization?.socials?.tiktok?.url && (
+            {customization?.socials?.tiktok?.url && customization?.socials?.tiktok?.active !== false && (
               <a 
                 href={customization.socials.tiktok.url} 
                 target="_blank" 
@@ -95,7 +95,7 @@ export const Header: React.FC = () => {
                 <IconTikTok size={14} className="w-3.5 h-3.5" />
               </a>
             )}
-            {customization?.socials?.pinterest?.url && (
+            {customization?.socials?.pinterest?.url && customization?.socials?.pinterest?.active !== false && (
               <a 
                 href={customization.socials.pinterest.url} 
                 target="_blank" 
@@ -107,7 +107,7 @@ export const Header: React.FC = () => {
                 <IconPinterest size={14} className="w-3.5 h-3.5" />
               </a>
             )}
-            {customization?.whatsappNumber && (
+            {customization?.whatsappNumber && customization?.socials?.whatsapp?.active !== false && (
               <a 
                 href={`https://wa.me/55${customization.whatsappNumber.replace(/\D/g, '')}`} 
                 target="_blank" 

@@ -6,7 +6,10 @@ import {
   CheckCircle2,
   Copy,
   Eye,
+  Facebook,
   Globe,
+  Instagram,
+  Phone,
   X,
   EyeOff,
   KeyRound,
@@ -1110,184 +1113,530 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
       </Card>
 
       
-      {/* 3.1. Gerenciador Avançado de Redes Sociais da Loja */}
+      {/* 3.1. Gerenciador Avançado de Redes Sociais com Ativação/Desativação & Preview Real */}
       <Card>
-        <SectionTitle
-          title="Redes Sociais Oficiais da Loja"
-          subtitle="Gerencie os canais oficiais da loja com validação e reconhecimento inteligente de @handles e links"
-        />
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Instagram Oficial (@handle ou Link)" hint="Aparece no rodapé e em botões de redes">
-              <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--admin-text-main)]">Redes Sociais Oficiais da Loja</h2>
+            <p className="mt-0.5 text-xs text-[var(--admin-text-muted)]">
+              Ative, desative e personalize cada canal social com preview em tempo real idêntico à visão do lead no site
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Sincronizado com Topo & Rodapé
+          </span>
+        </div>
+
+        <div className="space-y-6">
+          {/* PRÉVIA AO VIVO 100% REAL IDENTICA À VISÃO DO LEAD (Screenshot 3) */}
+          <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-b from-[#151318] to-[#0d0c10] p-4 sm:p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-rose-500/20 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/20 text-rose-400">
+                  <Eye className="h-4 w-4" />
+                </span>
+                <div>
+                  <h3 className="text-xs font-bold text-rose-400 uppercase tracking-wider">
+                    Prévia ao Vivo no Topo & Rodapé da Loja (Visão Real do Lead)
+                  </h3>
+                  <p className="text-[11px] text-stone-400">
+                    Apenas os canais com a chave "Ativo" ligada serão exibidos para as clientes no site
+                  </p>
+                </div>
+              </div>
+              <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-semibold px-2.5 py-0.5">
+                Tempo Real
+              </span>
+            </div>
+
+            {/* Simulação da Barra Superior do Cabeçalho da Loja (Screenshot 3) */}
+            <div className="rounded-xl border border-rose-200/40 bg-[#FAF7F8] p-3 text-stone-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                  Barra do Topo:
+                </span>
+                <div className="flex items-center gap-3">
+                  {/* Instagram Icon */}
+                  {customization.socials?.instagram?.active !== false && (
+                    <div className="flex items-center justify-center text-stone-500 hover:text-[#DC7898] transition-colors cursor-pointer" title="Instagram Ativo">
+                      <Instagram className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+
+                  {/* Facebook Icon */}
+                  {customization.socials?.facebook?.active !== false && (
+                    <div className="flex items-center justify-center text-stone-500 hover:text-[#DC7898] transition-colors cursor-pointer" title="Facebook Ativo">
+                      <Facebook className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+
+                  {/* TikTok Icon */}
+                  {customization.socials?.tiktok?.active !== false && (
+                    <div className="flex items-center justify-center text-stone-500 hover:text-[#DC7898] transition-colors cursor-pointer" title="TikTok Ativo">
+                      <span className="text-xs font-bold leading-none">♪</span>
+                    </div>
+                  )}
+
+                  {/* Pinterest Icon */}
+                  {customization.socials?.pinterest?.active !== false && (
+                    <div className="flex items-center justify-center text-stone-500 hover:text-[#DC7898] transition-colors cursor-pointer" title="Pinterest Ativo">
+                      <span className="text-xs font-bold leading-none">P</span>
+                    </div>
+                  )}
+
+                  {/* WhatsApp Icon */}
+                  {customization.socials?.whatsapp?.active !== false && (
+                    <div className="flex items-center justify-center text-stone-500 hover:text-emerald-600 transition-colors cursor-pointer" title="WhatsApp Ativo">
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
+                  )}
+
+                  {(!customization.socials || (
+                    customization.socials?.instagram?.active === false &&
+                    customization.socials?.facebook?.active === false &&
+                    customization.socials?.tiktok?.active === false &&
+                    customization.socials?.pinterest?.active === false &&
+                    customization.socials?.whatsapp?.active === false
+                  )) && (
+                    <span className="text-xs text-stone-400 italic">
+                      Nenhum canal ativo — os ícones não aparecerão no topo da loja.
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-[11px] text-stone-500 font-medium">
+                Simulação idêntica à barra delicada do topo do site
+              </div>
+            </div>
+
+            {/* Simulação dos Botões Circulares do Rodapé */}
+            <div className="rounded-xl border border-white/5 bg-black/40 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                Botões Circulares do Rodapé:
+              </span>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {customization.socials?.instagram?.active !== false && (
+                  <div className="w-8 h-8 rounded-full bg-white border border-rose-200 text-stone-700 flex items-center justify-center shadow-xs" title="Instagram">
+                    <Instagram className="w-3.5 h-3.5 text-[#DC7898]" />
+                  </div>
+                )}
+                {customization.socials?.whatsapp?.active !== false && (
+                  <div className="w-8 h-8 rounded-full bg-white border border-rose-200 text-[#25D366] flex items-center justify-center shadow-xs" title="WhatsApp">
+                    <Phone className="w-3.5 h-3.5" />
+                  </div>
+                )}
+                {customization.socials?.tiktok?.active !== false && (
+                  <div className="w-8 h-8 rounded-full bg-white border border-rose-200 text-stone-800 flex items-center justify-center shadow-xs text-xs font-bold" title="TikTok">
+                    ♪
+                  </div>
+                )}
+                {customization.socials?.pinterest?.active !== false && (
+                  <div className="w-8 h-8 rounded-full bg-white border border-rose-200 text-[#E60023] flex items-center justify-center shadow-xs text-xs font-bold" title="Pinterest">
+                    P
+                  </div>
+                )}
+                {customization.socials?.facebook?.active !== false && (
+                  <div className="w-8 h-8 rounded-full bg-white border border-rose-200 text-[#1877F2] flex items-center justify-center shadow-xs" title="Facebook">
+                    <Facebook className="w-3.5 h-3.5" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* GRID DE CONFIGURAÇÃO DOS CANAIS COM TOGGLE INDIVIDUAL LIGA/DESLIGA */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* INSTAGRAM */}
+            <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-xs">
+                    <Instagram className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--admin-text-main)]">Instagram Oficial</h3>
+                    <p className="text-[10px] text-[var(--admin-text-subtle)]">Feed & Stories da Boutique</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
+                    customization.socials?.instagram?.active !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-stone-500/10 text-stone-400 border border-stone-600/30'
+                  )}>
+                    {customization.socials?.instagram?.active !== false ? 'Ativo' : 'Desativado'}
+                  </span>
+                  <Toggle
+                    checked={customization.socials?.instagram?.active !== false}
+                    onChange={(checked) => {
+                      setCustomization({
+                        ...customization,
+                        socials: {
+                          ...(customization.socials || {}),
+                          instagram: {
+                            ...(customization.socials?.instagram || {}),
+                            platform: 'instagram',
+                            active: checked
+                          }
+                        }
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Field label="@handle ou Link Completo">
                 <Input
                   value={customization.socials?.instagram?.handle || ''}
                   onChange={(e) => {
                     const raw = e.target.value.trim();
                     const cleanHandle = raw.replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/^@/, '');
-                    const fullUrl = cleanHandle ? `https://instagram.com/${cleanHandle}` : '';
+                    const fullUrl = cleanHandle ? 'https://instagram.com/' + cleanHandle : '';
                     setCustomization({
                       ...customization,
                       socials: {
                         ...(customization.socials || {}),
                         instagram: {
+                          ...(customization.socials?.instagram || {}),
                           platform: 'instagram',
-                          handle: cleanHandle ? `@${cleanHandle}` : '',
+                          handle: cleanHandle ? '@' + cleanHandle : '',
                           url: fullUrl,
-                          isVerified: true
+                          active: customization.socials?.instagram?.active !== false
                         }
                       }
                     });
                   }}
-                  placeholder="Ex: @flordeseda ou link completo"
+                  placeholder="Ex: @flordeseda ou link"
                 />
-                {customization.socials?.instagram?.url && (
-                  <div className="flex items-center justify-between text-[11px] text-stone-400 pt-1">
-                    <span className="truncate text-rose-400 font-mono">{customization.socials.instagram.url}</span>
-                    <a
-                      href={customization.socials.instagram.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-stone-300 hover:text-white underline ml-2 shrink-0"
-                    >
-                      Testar Link
-                    </a>
-                  </div>
-                )}
-              </div>
-            </Field>
+              </Field>
 
-            <Field label="TikTok Oficial (@handle ou Link)">
-              <div className="space-y-1">
+              {customization.socials?.instagram?.url && (
+                <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
+                  <span className="truncate text-rose-400 font-mono text-[10px]">{customization.socials.instagram.url}</span>
+                  <a
+                    href={customization.socials.instagram.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-300 hover:text-white underline text-[10px] shrink-0 ml-2"
+                  >
+                    Testar Link
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* TIKTOK */}
+            <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-black border border-stone-800 text-white font-bold text-xs shadow-xs">
+                    ♪
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--admin-text-main)]">TikTok Oficial</h3>
+                    <p className="text-[10px] text-[var(--admin-text-subtle)]">Vídeos de looks & bastidores</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
+                    customization.socials?.tiktok?.active !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-stone-500/10 text-stone-400 border border-stone-600/30'
+                  )}>
+                    {customization.socials?.tiktok?.active !== false ? 'Ativo' : 'Desativado'}
+                  </span>
+                  <Toggle
+                    checked={customization.socials?.tiktok?.active !== false}
+                    onChange={(checked) => {
+                      setCustomization({
+                        ...customization,
+                        socials: {
+                          ...(customization.socials || {}),
+                          tiktok: {
+                            ...(customization.socials?.tiktok || {}),
+                            platform: 'tiktok',
+                            active: checked
+                          }
+                        }
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Field label="@handle ou Link Completo">
                 <Input
                   value={customization.socials?.tiktok?.handle || ''}
                   onChange={(e) => {
                     const raw = e.target.value.trim();
                     const cleanHandle = raw.replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/, '').replace(/^@/, '');
-                    const fullUrl = cleanHandle ? `https://tiktok.com/@${cleanHandle}` : '';
+                    const fullUrl = cleanHandle ? 'https://tiktok.com/@' + cleanHandle : '';
                     setCustomization({
                       ...customization,
                       socials: {
                         ...(customization.socials || {}),
                         tiktok: {
+                          ...(customization.socials?.tiktok || {}),
                           platform: 'tiktok',
-                          handle: cleanHandle ? `@${cleanHandle}` : '',
+                          handle: cleanHandle ? '@' + cleanHandle : '',
                           url: fullUrl,
-                          isVerified: true
+                          active: customization.socials?.tiktok?.active !== false
                         }
                       }
                     });
                   }}
                   placeholder="Ex: @flordeseda"
                 />
-                {customization.socials?.tiktok?.url && (
-                  <div className="flex items-center justify-between text-[11px] text-stone-400 pt-1">
-                    <span className="truncate text-rose-400 font-mono">{customization.socials.tiktok.url}</span>
-                    <a
-                      href={customization.socials.tiktok.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-stone-300 hover:text-white underline ml-2 shrink-0"
-                    >
-                      Testar Link
-                    </a>
-                  </div>
-                )}
-              </div>
-            </Field>
+              </Field>
 
-            <Field label="Facebook Oficial (Página ou Usuário)">
-              <div className="space-y-1">
+              {customization.socials?.tiktok?.url && (
+                <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
+                  <span className="truncate text-rose-400 font-mono text-[10px]">{customization.socials.tiktok.url}</span>
+                  <a
+                    href={customization.socials.tiktok.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-300 hover:text-white underline text-[10px] shrink-0 ml-2"
+                  >
+                    Testar Link
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* FACEBOOK */}
+            <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1877F2] text-white shadow-xs">
+                    <Facebook className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--admin-text-main)]">Facebook Oficial</h3>
+                    <p className="text-[10px] text-[var(--admin-text-subtle)]">Página ou comunidade</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
+                    customization.socials?.facebook?.active !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-stone-500/10 text-stone-400 border border-stone-600/30'
+                  )}>
+                    {customization.socials?.facebook?.active !== false ? 'Ativo' : 'Desativado'}
+                  </span>
+                  <Toggle
+                    checked={customization.socials?.facebook?.active !== false}
+                    onChange={(checked) => {
+                      setCustomization({
+                        ...customization,
+                        socials: {
+                          ...(customization.socials || {}),
+                          facebook: {
+                            ...(customization.socials?.facebook || {}),
+                            platform: 'facebook',
+                            active: checked
+                          }
+                        }
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Field label="Nome da Página ou Link Completo">
                 <Input
                   value={customization.socials?.facebook?.handle || ''}
                   onChange={(e) => {
                     const raw = e.target.value.trim();
                     const clean = raw.replace(/^https?:\/\/(www\.)?facebook\.com\//, '');
-                    const fullUrl = clean ? `https://facebook.com/${clean}` : '';
+                    const fullUrl = clean ? 'https://facebook.com/' + clean : '';
                     setCustomization({
                       ...customization,
                       socials: {
                         ...(customization.socials || {}),
                         facebook: {
+                          ...(customization.socials?.facebook || {}),
                           platform: 'facebook',
                           handle: clean,
                           url: fullUrl,
-                          isVerified: true
+                          active: customization.socials?.facebook?.active !== false
                         }
                       }
                     });
                   }}
                   placeholder="Ex: flordeseda.oficial"
                 />
-                {customization.socials?.facebook?.url && (
-                  <div className="flex items-center justify-between text-[11px] text-stone-400 pt-1">
-                    <span className="truncate text-rose-400 font-mono">{customization.socials.facebook.url}</span>
-                    <a
-                      href={customization.socials.facebook.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-stone-300 hover:text-white underline ml-2 shrink-0"
-                    >
-                      Testar Link
-                    </a>
-                  </div>
-                )}
-              </div>
-            </Field>
+              </Field>
 
-            <Field label="Pinterest Oficial (Perfil de Looks)">
-              <div className="space-y-1">
+              {customization.socials?.facebook?.url && (
+                <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
+                  <span className="truncate text-rose-400 font-mono text-[10px]">{customization.socials.facebook.url}</span>
+                  <a
+                    href={customization.socials.facebook.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-300 hover:text-white underline text-[10px] shrink-0 ml-2"
+                  >
+                    Testar Link
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* PINTEREST */}
+            <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#E60023] text-white font-bold text-xs shadow-xs">
+                    P
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--admin-text-main)]">Pinterest Oficial</h3>
+                    <p className="text-[10px] text-[var(--admin-text-subtle)]">Painéis de inspiração & looks</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
+                    customization.socials?.pinterest?.active !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-stone-500/10 text-stone-400 border border-stone-600/30'
+                  )}>
+                    {customization.socials?.pinterest?.active !== false ? 'Ativo' : 'Desativado'}
+                  </span>
+                  <Toggle
+                    checked={customization.socials?.pinterest?.active !== false}
+                    onChange={(checked) => {
+                      setCustomization({
+                        ...customization,
+                        socials: {
+                          ...(customization.socials || {}),
+                          pinterest: {
+                            ...(customization.socials?.pinterest || {}),
+                            platform: 'pinterest',
+                            active: checked
+                          }
+                        }
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Field label="Perfil do Pinterest ou Link Completo">
                 <Input
                   value={customization.socials?.pinterest?.handle || ''}
                   onChange={(e) => {
                     const raw = e.target.value.trim();
                     const clean = raw.replace(/^https?:\/\/(www\.)?pinterest\.com\//, '');
-                    const fullUrl = clean ? `https://pinterest.com/${clean}` : '';
+                    const fullUrl = clean ? 'https://pinterest.com/' + clean : '';
                     setCustomization({
                       ...customization,
                       socials: {
                         ...(customization.socials || {}),
                         pinterest: {
+                          ...(customization.socials?.pinterest || {}),
                           platform: 'pinterest',
                           handle: clean,
                           url: fullUrl,
-                          isVerified: true
+                          active: customization.socials?.pinterest?.active !== false
                         }
                       }
                     });
                   }}
                   placeholder="Ex: flordeseda"
                 />
-                {customization.socials?.pinterest?.url && (
-                  <div className="flex items-center justify-between text-[11px] text-stone-400 pt-1">
-                    <span className="truncate text-rose-400 font-mono">{customization.socials.pinterest.url}</span>
-                    <a
-                      href={customization.socials.pinterest.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-stone-300 hover:text-white underline ml-2 shrink-0"
-                    >
-                      Testar Link
-                    </a>
+              </Field>
+
+              {customization.socials?.pinterest?.url && (
+                <div className="flex items-center justify-between text-[11px] text-stone-400 pt-0.5">
+                  <span className="truncate text-rose-400 font-mono text-[10px]">{customization.socials.pinterest.url}</span>
+                  <a
+                    href={customization.socials.pinterest.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-300 hover:text-white underline text-[10px] shrink-0 ml-2"
+                  >
+                    Testar Link
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* WHATSAPP */}
+            <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card-bg)] p-4 space-y-3 shadow-xs sm:col-span-2">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#25D366] text-white shadow-xs">
+                    <Phone className="h-4 w-4" />
                   </div>
-                )}
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--admin-text-main)]">WhatsApp & Atendimento Direto</h3>
+                    <p className="text-[10px] text-[var(--admin-text-subtle)]">Canal de suporte e vendas 1 a 1</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-[10px] font-bold px-2 py-0.5 rounded-full uppercase',
+                    customization.socials?.whatsapp?.active !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-stone-500/10 text-stone-400 border border-stone-600/30'
+                  )}>
+                    {customization.socials?.whatsapp?.active !== false ? 'Ativo' : 'Desativado'}
+                  </span>
+                  <Toggle
+                    checked={customization.socials?.whatsapp?.active !== false}
+                    onChange={(checked) => {
+                      setCustomization({
+                        ...customization,
+                        socials: {
+                          ...(customization.socials || {}),
+                          whatsapp: {
+                            ...(customization.socials?.whatsapp || {}),
+                            platform: 'whatsapp',
+                            active: checked
+                          }
+                        }
+                      });
+                    }}
+                  />
+                </div>
               </div>
-            </Field>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Número de WhatsApp da Loja (com DDD)">
+                  <Input
+                    value={customization.whatsappNumber || ''}
+                    onChange={(e) => setCustomization({ ...customization, whatsappNumber: e.target.value })}
+                    placeholder="Ex: (11) 98744-1290"
+                  />
+                </Field>
+                <Field label="Mensagem Inicial de Saudação" hint="Pré-carregada quando o lead clica">
+                  <Input
+                    value={customization.greetingMessage || ''}
+                    onChange={(e) => setCustomization({ ...customization, greetingMessage: e.target.value })}
+                    placeholder="Ex: Olá! Vim pelo site da Flor de Seda..."
+                  />
+                </Field>
+              </div>
+            </div>
           </div>
 
-          <Field label="Mensagem Inicial de Saudação do WhatsApp" hint="Texto pré-preenchido quando o lead clica no botão do WhatsApp">
-            <Input
-              value={customization.greetingMessage || ''}
-              onChange={(e) => setCustomization({ ...customization, greetingMessage: e.target.value })}
-              placeholder="Ex: Olá! Vim pelo site da Flor de Seda e gostaria de tirar uma dúvida sobre os vestidos."
-            />
-          </Field>
-
-          {/* Prévia ao Vivo das Redes Sociais */}
-          <div className="p-3.5 rounded-xl bg-black/30 border border-[var(--admin-border)] flex items-center justify-between">
+          {/* Botão de Salvar Redes Sociais */}
+          <div className="p-3.5 rounded-2xl bg-black/30 border border-[var(--admin-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs text-stone-300">
               <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-              <span>Canais configurados e sincronizados com o rodapé e atendimento da loja</span>
+              <span>Canais configurados e sincronizados com o topo, rodapé e atendimento da loja</span>
             </div>
             <Button
               size="sm"
@@ -1297,7 +1646,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                 setConfirmModal({
                   open: true,
                   title: 'Confirmar Atualização das Redes Sociais',
-                  description: 'Deseja publicar os novos links e perfis das redes sociais na loja imediatamente?',
+                  description: 'Deseja publicar os novos canais ativos e links das redes sociais na loja imediatamente?',
                   onConfirm: async () => {
                     setConfirmModal(null);
                     await save('customization');
