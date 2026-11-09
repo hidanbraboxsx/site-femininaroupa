@@ -29,7 +29,7 @@ function securityHeaders(req, res, next) {
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   // Permite preview do admin (localhost/127.0.0.1 em qualquer porta) em iframe sem quebrar o isolamento
   const devFrameAncestors = "'self' http://localhost:* http://127.0.0.1:* http://*:* https://*:*";
-  const prodFrameAncestors = "'self' http://localhost:3100 http://127.0.0.1:3100 http://localhost:3000 http://127.0.0.1:3000";
+  const prodFrameAncestors = "'self' http://localhost:3100 http://127.0.0.1:3100 http://localhost:3000 http://127.0.0.1:3000 https://fashionstylogirlsbr.vercel.app https://*.vercel.app";
   const frameAncestors = !config.isProduction ? devFrameAncestors : prodFrameAncestors;
 
   if (!config.isProduction) {
