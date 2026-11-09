@@ -57,6 +57,7 @@ export function originGuard(req, res, next) {
     if (host.host === reqHost) return next();
     if (host.hostname === 'localhost' || host.hostname === '127.0.0.1') return next();
     if (allowed.has(host.origin)) return next();
+    if (host.hostname.endsWith('.vercel.app')) return next();
     if (host.hostname.endsWith('.trycloudflare.com')) return next();
   } catch {
     return next(new HttpError(403, 'Origem inválida.', 'invalid_origin'));
