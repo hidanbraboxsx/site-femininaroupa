@@ -60,6 +60,9 @@ router.get('/health', (req, res) => {
 });
 
 router.get('/store', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const data = db();
   res.json({
     ok: true,
@@ -68,7 +71,7 @@ router.get('/store', (req, res) => {
     categories: productCategories(),
     settings: publicSettings(),
     features: {
-      pixConfigured: Boolean(data.settings.gateway.pixKey),
+      pixConfigured: Boolean(data.settings.gateway.pixKey || data.settings.gateway.syncpay?.enabled),
       cardCheckout: false,
       telegramConfigured: Boolean(data.telegram.tokenEncrypted || config.telegram.token)
     },

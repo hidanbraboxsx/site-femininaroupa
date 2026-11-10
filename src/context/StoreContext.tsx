@@ -259,6 +259,34 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [error, setError] = useState<string | null>(null);
   const [payload, setPayload] = useState<StorePayload | null>(null);
 
+  // Estados otimistas em memória para sincronização instantânea em 0ms
+  const [liveCustomization, setLiveCustomization] = useState<Partial<StoreCustomization> | null>(() => {
+    try {
+      const raw = localStorage.getItem('aura_synced_customization');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [liveBanners, setLiveBanners] = useState<Banner[] | null>(() => {
+    try {
+      const raw = localStorage.getItem('aura_synced_banners');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [liveProducts, setLiveProducts] = useState<Product[] | null>(() => {
+    try {
+      const raw = localStorage.getItem('aura_synced_products');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [reviews, setReviews] = useState<Record<string, Review[]>>({});
   const [cart, setCart] = useState<CartItem[]>(() => {
     const val = readLocal<CartItem[]>(CART_KEY, []);
@@ -307,6 +335,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const data = await shopApi.store();
       setPayload(data);
+      if (data.settings?.customization) {
+        try {
+          localStorage.setItem('aura_synced_customization', JSON.stringify(data.settings.customization));
+        } catch {}
+      }
+      if (Array.isArray(data.banners)) {
+        try {
+          localStorage.setItem('aura_synced_banners', JSON.stringify(data.banners));
+        } catch {}
+      }
+      if (Array.isArray(data.products)) {
+        try {
+          localStorage.setItem('aura_synced_products', JSON.stringify(data.products));
+        } catch {}
+      }
       setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Falha ao carregar a loja.');
@@ -344,11 +387,22 @@ useEffect(() => {
     loadSession();
   }, [loadStore, loadSession]);
 
-  /* --------------- Sincronização inteligente em tempo real (BroadcastChannel + Storage + Visibility + SSE) --------------- */
+  /* --------------- Sincronização inteligente em tempo real (Eventos Nativos + BroadcastChannel + Storage + Visibility + SSE) --------------- */
   useEffect(() => {
     let source: EventSource | null = null;
 
-    // 1. SSE do servidor para mudanças no backend
+    // 1. Evento nativo na mesma janela (vital para Preview interno e mesma aba)
+    const handleStoreChange = (e: any) => {
+      const detail = e?.detail;
+      if (detail?.customization) setLiveCustomization(detail.customization);
+      if (detail?.banners) setLiveBanners(detail.banners);
+      if (detail?.products) setLiveProducts(detail.products);
+      loadStore();
+      if (customerToken.get()) loadSession();
+    };
+    window.addEventListener('aura:store:change', handleStoreChange);
+
+    // 2. SSE do servidor para mudanças no backend
     try {
       source = new EventSource('/api/events');
       source.addEventListener('change', () => {
@@ -360,26 +414,44 @@ useEffect(() => {
       };
     } catch {}
 
-    // 2. BroadcastChannel: comunicação instantânea entre abas no mesmo navegador (0ms de atraso)
+    // 3. BroadcastChannel: comunicação instantânea entre abas no mesmo navegador (0ms de atraso)
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel('aura_store_sync');
-      channel.onmessage = () => {
+      channel.onmessage = (e) => {
+        const data = e.data;
+        if (data?.customization) setLiveCustomization(data.customization);
+        if (data?.banners) setLiveBanners(data.banners);
+        if (data?.products) setLiveProducts(data.products);
         loadStore();
         if (customerToken.get()) loadSession();
       };
     } catch {}
 
-    // 3. Storage event: detecta quando o admin salva alterações em outra aba/janela
+    // 4. Storage event: detecta quando o admin salva alterações em outra aba/janela
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'aura_last_sync_timestamp' || e.key === 'aura_synced_customization' || e.key === 'aura_synced_banners') {
+      if (
+        e.key === 'aura_last_sync_timestamp' ||
+        e.key === 'aura_synced_customization' ||
+        e.key === 'aura_synced_banners' ||
+        e.key === 'aura_synced_products'
+      ) {
+        if (e.key === 'aura_synced_customization' && e.newValue) {
+          try { setLiveCustomization(JSON.parse(e.newValue)); } catch {}
+        }
+        if (e.key === 'aura_synced_banners' && e.newValue) {
+          try { setLiveBanners(JSON.parse(e.newValue)); } catch {}
+        }
+        if (e.key === 'aura_synced_products' && e.newValue) {
+          try { setLiveProducts(JSON.parse(e.newValue)); } catch {}
+        }
         loadStore();
         if (customerToken.get()) loadSession();
       }
     };
     window.addEventListener('storage', handleStorage);
 
-    // 4. Ao alternar para a aba da loja (quando o admin clica de volta na aba da loja)
+    // 5. Ao alternar para a aba da loja (quando o admin clica de volta na aba da loja)
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         loadStore();
@@ -388,12 +460,13 @@ useEffect(() => {
     };
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // 5. Polling rápido de conferência (a cada 3.5s) garantindo que a página inicial nunca fique desatualizada
+    // 6. Polling rápido de conferência (a cada 3s) garantindo que a página inicial nunca fique desatualizada
     const pollInterval = setInterval(() => {
       loadStore();
-    }, 3500);
+    }, 3000);
 
     return () => {
+      window.removeEventListener('aura:store:change', handleStoreChange);
       if (source) source.close();
       if (channel) channel.close();
       window.removeEventListener('storage', handleStorage);
@@ -452,16 +525,28 @@ useEffect(() => {
   /* ------------------------- Cores e tipografia ------------------------- */
 
   const customization = useMemo<StoreCustomization>(() => {
+    const serverSource = (payload?.settings?.customization || {}) as Partial<StoreCustomization>;
     let localSaved: any = null;
     try {
       const raw = localStorage.getItem('aura_synced_customization');
       if (raw) localSaved = JSON.parse(raw);
     } catch {}
-    const source = (payload?.settings?.customization || {}) as Partial<StoreCustomization>;
-    return { ...FALLBACK_CUSTOMIZATION, ...source, ...(localSaved || {}) } as StoreCustomization;
-  }, [payload]);
+    // A fonte do servidor (persistida) atualiza sobre a local; liveCustomization reflete em tempo real 0ms
+    return {
+      ...FALLBACK_CUSTOMIZATION,
+      ...(localSaved || {}),
+      ...serverSource,
+      ...(liveCustomization || {})
+    } as StoreCustomization;
+  }, [payload, liveCustomization]);
 
   const banners = useMemo<Banner[]>(() => {
+    if (liveBanners && Array.isArray(liveBanners) && liveBanners.length > 0) {
+      return liveBanners;
+    }
+    if (payload?.banners && Array.isArray(payload.banners) && payload.banners.length > 0) {
+      return payload.banners;
+    }
     let localBanners: any[] | null = null;
     try {
       const raw = localStorage.getItem('aura_synced_banners');
@@ -471,7 +556,7 @@ useEffect(() => {
       return localBanners;
     }
     return payload?.banners || [];
-  }, [payload]);
+  }, [payload, liveBanners]);
 
   const activeCategories = useMemo(() => {
     const list = customization?.categories;
@@ -513,7 +598,23 @@ useEffect(() => {
     return cleanup;
   }, [customization]);
 
-  const products = payload?.products || [];
+  const products = useMemo<Product[]>(() => {
+    if (liveProducts && Array.isArray(liveProducts) && liveProducts.length > 0) {
+      return liveProducts;
+    }
+    if (payload?.products && Array.isArray(payload.products)) {
+      return payload.products;
+    }
+    let localProducts: any[] | null = null;
+    try {
+      const raw = localStorage.getItem('aura_synced_products');
+      if (raw) localProducts = JSON.parse(raw);
+    } catch {}
+    if (localProducts && Array.isArray(localProducts) && localProducts.length > 0) {
+      return localProducts;
+    }
+    return payload?.products || [];
+  }, [payload, liveProducts]);
   const paymentMethods = payload?.settings?.paymentMethods || [
     { id: 'pix', name: 'PIX', enabled: true, badge: 'Aprovação Imediata' },
     { id: 'credit_card', name: 'CARTÃO (ATENDIMENTO)', enabled: true, badge: 'Personalizado' }

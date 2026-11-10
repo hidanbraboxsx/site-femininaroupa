@@ -436,7 +436,8 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
       } else {
         await adminApi.createProduct(payload);
       }
-      notifyStoreChange();
+      const fresh = await adminApi.products().catch(() => null);
+      notifyStoreChange({ products: fresh?.products });
       setOpen(false);
       await reload();
     });
@@ -446,7 +447,9 @@ export function CatalogTab({ liveKey }: { liveKey: number }) {
   async function remove(product: Product) {
     if (!window.confirm(`Remover "${product.name}" do catálogo? Esta ação não afeta pedidos já registrados.`)) return;
     const result = await run(async () => {
-      await adminApi.deleteProduct(product.id); notifyStoreChange();
+      await adminApi.deleteProduct(product.id);
+      const fresh = await adminApi.products().catch(() => null);
+      notifyStoreChange({ products: fresh?.products });
       await reload();
     });
     toast.push(result.ok ? 'Produto removido.' : (result as any).error, result.ok ? 'success' : 'error');
@@ -1292,7 +1295,8 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
       } else {
         await adminApi.createBanner(payload);
       }
-      notifyStoreChange();
+      const fresh = await adminApi.banners().catch(() => null);
+      notifyStoreChange({ banners: fresh?.banners });
       setOpen(false);
       await reload();
     });
@@ -1308,7 +1312,8 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
     if (!window.confirm(`Deseja excluir o banner "${banner.title}" da vitrine?`)) return;
     const result = await run(async () => {
       await adminApi.deleteBanner(banner.id);
-      notifyStoreChange();
+      const fresh = await adminApi.banners().catch(() => null);
+      notifyStoreChange({ banners: fresh?.banners });
       await reload();
     });
     toast.push(result.ok ? 'Banner removido.' : (result as any).error, result.ok ? 'success' : 'error');
@@ -1405,7 +1410,8 @@ export function BannersTab({ liveKey }: { liveKey: number }) {
                         variant="ghost"
                         onClick={async () => {
                           await adminApi.updateBanner(banner.id, { active: !banner.active });
-                          notifyStoreChange();
+                          const fresh = await adminApi.banners().catch(() => null);
+                          notifyStoreChange({ banners: fresh?.banners });
                           await reload();
                           toast.push(banner.active ? 'Banner pausado.' : 'Banner ativado!', 'success');
                         }}

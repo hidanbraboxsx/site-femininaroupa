@@ -24,6 +24,7 @@ function migrate(data) {
   const seed = buildSeed();
   const merged = { ...seed, ...data };
   merged.products = Array.isArray(data.products) ? data.products : [];
+  merged.banners = Array.isArray(data.banners) ? data.banners : (seed.banners || []);
   merged.orders = Array.isArray(data.orders) ? data.orders : [];
   merged.customers = Array.isArray(data.customers) ? data.customers : [];
   merged.coupons = Array.isArray(data.coupons) ? data.coupons : [];

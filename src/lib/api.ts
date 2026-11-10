@@ -86,7 +86,7 @@ export interface StorePayload {
 }
 
 
-export function notifyStoreChange(extraData?: { customization?: any; banners?: any[]; products?: any[] }) {
+export function notifyStoreChange(extraData?: { customization?: any; banners?: any[]; products?: any[]; paymentMethods?: any[] }) {
   try {
     if (extraData?.customization) {
       localStorage.setItem('aura_synced_customization', JSON.stringify(extraData.customization));
@@ -94,17 +94,30 @@ export function notifyStoreChange(extraData?: { customization?: any; banners?: a
     if (extraData?.banners) {
       localStorage.setItem('aura_synced_banners', JSON.stringify(extraData.banners));
     }
+    if (extraData?.products) {
+      localStorage.setItem('aura_synced_products', JSON.stringify(extraData.products));
+    }
+    if (extraData?.paymentMethods) {
+      localStorage.setItem('aura_synced_payments', JSON.stringify(extraData.paymentMethods));
+    }
+    localStorage.setItem('aura_last_sync_timestamp', String(Date.now()));
   } catch {}
 
+  // 1. Notifica abas irmãs via BroadcastChannel
   try {
     const channel = new BroadcastChannel('aura_store_sync');
     channel.postMessage({ type: 'store_updated', timestamp: Date.now(), ...extraData });
-    channel.close();
+    setTimeout(() => {
+      try { channel.close(); } catch {}
+    }, 1000);
   } catch {}
 
-  try {
-    localStorage.setItem('aura_last_sync_timestamp', String(Date.now()));
-  } catch {}
+  // 2. Dispara evento nativo na mesma janela (vital para Preview interno e mesma aba)
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new CustomEvent('aura:store:change', { detail: extraData || {} }));
+    } catch {}
+  }
 }
 
 export const shopApi = {

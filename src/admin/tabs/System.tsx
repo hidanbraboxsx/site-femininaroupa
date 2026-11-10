@@ -716,8 +716,9 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
   async function save(section: 'customization' | 'gateway' | 'shipping' | 'payments') {
     const result = await run(async () => {
       if (section === 'customization') {
-        await adminApi.saveCustomization(customization);
-        notifyStoreChange({ customization });
+        const res = await adminApi.saveCustomization(customization);
+        const finalCustom = res?.customization || customization;
+        notifyStoreChange({ customization: finalCustom });
       }
       if (section === 'gateway') {
         await adminApi.saveGateway(gateway);
@@ -728,15 +729,20 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
         notifyStoreChange();
       }
       if (section === 'payments') {
-        await adminApi.savePaymentMethods(paymentMethods);
-        notifyStoreChange();
+        const res = await adminApi.savePaymentMethods(paymentMethods);
+        notifyStoreChange({ paymentMethods: res?.paymentMethods || paymentMethods });
       }
       await reload();
     });
     if (result.ok) {
-      notifyStoreChange({ customization });
+      if (section === 'customization') {
+        notifyStoreChange({ customization });
+      }
+      if (section === 'payments') {
+        notifyStoreChange({ paymentMethods });
+      }
     }
-    toast.push(result.ok ? 'Configuração salva com sucesso.' : (result as any).error, result.ok ? 'success' : 'error');
+    toast.push(result.ok ? 'Configuração salva e sincronizada com a loja!' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
   if (loading || !customization || !gateway || !shipping) return <Spinner label="Carregando configurações…" />;
