@@ -29,19 +29,21 @@ export function PreviewTab() {
   const [iframeTimeout, setIframeTimeout] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Detecta o melhor endereço da loja para evitar bloqueios de IPv6 / CORS
+  // Detecta se estamos em produção (Vercel) ou desenvolvimento local
   const isWindow = typeof window !== 'undefined';
+  const hostname = isWindow ? window.location.hostname : 'localhost';
+  const isProduction = isWindow && hostname !== 'localhost' && hostname !== '127.0.0.1' && !hostname.startsWith('192.168.');
   const isPort3000 = isWindow && window.location.port === '3000';
-  const currentHost = isWindow ? window.location.hostname : 'localhost';
-  const ipv4Host = currentHost === 'localhost' ? '127.0.0.1' : currentHost;
+  const ipv4Host = hostname === 'localhost' ? '127.0.0.1' : hostname;
   const protocol = isWindow ? window.location.protocol : 'http:';
 
-  // Opções de rotas com fallback
-  const directRelative = '/';
+  // Em produção: iframe aponta para a mesma origem (/)
+  // Em dev: admin roda na 3100, loja na 3000
   const ipv4Url = `${protocol}//${ipv4Host}:3000/`;
   const localhostUrl = `${protocol}//localhost:3000/`;
+  const directRelative = '/';
 
-  const defaultUrl = isPort3000 ? directRelative : ipv4Url;
+  const defaultUrl = isProduction ? directRelative : (isPort3000 ? directRelative : ipv4Url);
   const [selectedUrl, setSelectedUrl] = useState<string>(defaultUrl);
 
   const handleRefresh = () => {
@@ -155,7 +157,7 @@ export function PreviewTab() {
               className="bg-transparent text-stone-300 text-xs focus:outline-none cursor-pointer"
             >
               <option value={defaultUrl} className="bg-stone-900 text-stone-200">
-                {isPort3000 ? 'Origem Local Direta (/)' : `Porta 3000 (${ipv4Host})`}
+                {isProduction ? 'Produção (mesma origem /)' : (isPort3000 ? 'Origem Local Direta (/)' : `Porta 3000 (${ipv4Host})`)}
               </option>
               {!isPort3000 && (
                 <option value={localhostUrl} className="bg-stone-900 text-stone-200">
@@ -258,6 +260,8 @@ export function PreviewTab() {
                   title="Preview da Loja Mobile"
                   onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0 select-auto"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
+                  allow="fullscreen"
                 />
               </div>
 
@@ -293,6 +297,8 @@ export function PreviewTab() {
                   title="Preview da Loja Tablet"
                   onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
+                  allow="fullscreen"
                 />
               </div>
             </div>
@@ -341,6 +347,8 @@ export function PreviewTab() {
                   title="Preview da Loja Computador"
                   onLoad={() => setIframeLoaded(true)}
                   className="w-full h-full border-0"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation-by-user-activation"
+                  allow="fullscreen"
                 />
               </div>
             </div>

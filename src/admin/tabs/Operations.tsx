@@ -28,7 +28,7 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import { adminApi } from '../../lib/api';
+import { adminApi, notifyStoreChange } from '../../lib/api';
 import type { Order } from '../../types';
 import { useAction, useLoad } from '../useLoad';
 import {
@@ -275,6 +275,8 @@ export function OrdersTab({ liveKey }: { liveKey: number }) {
     const result = await run(async () => {
       const { order } = await action();
       setSelected(order);
+      // Sincroniza vitrine: atualização de pedido impacta métricas e estoque
+      notifyStoreChange({});
       await reload();
     });
     toast.push(result.ok ? message : (result as any).error, result.ok ? 'success' : 'error');
@@ -620,6 +622,7 @@ export function OrdersTab({ liveKey }: { liveKey: number }) {
                         await run(async () => {
                           const res = await adminApi.setTracking(selected.id, tracking, statusNote);
                           setSelected(res.order);
+                          notifyStoreChange({});
                           await reload();
                           toast.push(`Rastreio oficial anexado ao pedido ${selected.id} e status atualizado para Enviado.`, 'success');
                           if (res.whatsappUrl) {
@@ -652,6 +655,7 @@ export function OrdersTab({ liveKey }: { liveKey: number }) {
                           updated = res.order;
                         }
                         setSelected(updated);
+                        notifyStoreChange({});
                         await reload();
                         toast.push(`Pedido ${selected.id} atualizado e sincronizado em tempo real.`, 'success');
                         setStatusNote('');

@@ -102,9 +102,11 @@ export function StockTab({ liveKey }: { liveKey: number }) {
         note: form.note
       });
       setOpen(false);
+      const fresh = await adminApi.products().catch(() => null);
+      notifyStoreChange({ products: fresh?.products });
       await Promise.all([reload(), movements.reload()]);
     });
-    toast.push(result.ok ? 'Movimento registrado e notificado.' : (result as any).error, result.ok ? 'success' : 'error');
+    toast.push(result.ok ? 'Movimento registrado e estoque sincronizado com a vitrine!' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
   async function quickMove(productId: string, variantKey: string, delta: number) {
@@ -117,6 +119,8 @@ export function StockTab({ liveKey }: { liveKey: number }) {
         reason: 'ajuste_inventario',
         note: 'Ajuste rápido pelo painel'
       });
+      const fresh = await adminApi.products().catch(() => null);
+      notifyStoreChange({ products: fresh?.products });
       await Promise.all([reload(), movements.reload()]);
     });
     if (!result.ok) toast.push((result as any).error, 'error');
@@ -1044,9 +1048,10 @@ export function CouponsTab({ liveKey }: { liveKey: number }) {
       });
       setOpen(false);
       setForm({ ...form, code: '', discountValue: '', minPurchase: '', maxUses: '', description: '' });
+      notifyStoreChange({});
       await reload();
     });
-    toast.push(result.ok ? 'Cupom criado.' : (result as any).error, result.ok ? 'success' : 'error');
+    toast.push(result.ok ? 'Cupom criado com sucesso!' : (result as any).error, result.ok ? 'success' : 'error');
   }
 
   return (
@@ -1071,8 +1076,8 @@ export function CouponsTab({ liveKey }: { liveKey: number }) {
                 <Td><Badge tone={coupon.isActive ? 'good' : 'neutral'}>{coupon.isActive ? 'ativo' : 'inativo'}</Badge></Td>
                 <Td>
                   <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" loading={busy} onClick={async () => { await adminApi.toggleCoupon(coupon.id); await reload(); }}>Alternar</Button>
-                    <button className="rounded-lg p-1.5 text-stone-400 hover:bg-red-500/10 hover:text-red-300" onClick={async () => { await adminApi.deleteCoupon(coupon.id); await reload(); }}>
+                    <Button size="sm" variant="ghost" loading={busy} onClick={async () => { await adminApi.toggleCoupon(coupon.id); notifyStoreChange({}); await reload(); }}>Alternar</Button>
+                    <button className="rounded-lg p-1.5 text-stone-400 hover:bg-red-500/10 hover:text-red-300" onClick={async () => { await adminApi.deleteCoupon(coupon.id); notifyStoreChange({}); await reload(); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>

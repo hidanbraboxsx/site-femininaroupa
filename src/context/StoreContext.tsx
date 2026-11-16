@@ -287,6 +287,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
+  const [livePaymentMethods, setLivePaymentMethods] = useState<Array<{ id: string; name: string; enabled: boolean; badge?: string; imageUrl?: string; description?: string; color?: string }> | null>(() => {
+    try {
+      const raw = localStorage.getItem('aura_synced_payment_methods');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [reviews, setReviews] = useState<Record<string, Review[]>>({});
   const [cart, setCart] = useState<CartItem[]>(() => {
     const val = readLocal<CartItem[]>(CART_KEY, []);
@@ -397,6 +406,7 @@ useEffect(() => {
       if (detail?.customization) setLiveCustomization(detail.customization);
       if (detail?.banners) setLiveBanners(detail.banners);
       if (detail?.products) setLiveProducts(detail.products);
+      if (detail?.paymentMethods) setLivePaymentMethods(detail.paymentMethods);
       loadStore();
       if (customerToken.get()) loadSession();
     };
@@ -423,6 +433,7 @@ useEffect(() => {
         if (data?.customization) setLiveCustomization(data.customization);
         if (data?.banners) setLiveBanners(data.banners);
         if (data?.products) setLiveProducts(data.products);
+        if (data?.paymentMethods) setLivePaymentMethods(data.paymentMethods);
         loadStore();
         if (customerToken.get()) loadSession();
       };
@@ -434,7 +445,8 @@ useEffect(() => {
         e.key === 'aura_last_sync_timestamp' ||
         e.key === 'aura_synced_customization' ||
         e.key === 'aura_synced_banners' ||
-        e.key === 'aura_synced_products'
+        e.key === 'aura_synced_products' ||
+        e.key === 'aura_synced_payment_methods'
       ) {
         if (e.key === 'aura_synced_customization' && e.newValue) {
           try { setLiveCustomization(JSON.parse(e.newValue)); } catch {}
@@ -444,6 +456,9 @@ useEffect(() => {
         }
         if (e.key === 'aura_synced_products' && e.newValue) {
           try { setLiveProducts(JSON.parse(e.newValue)); } catch {}
+        }
+        if (e.key === 'aura_synced_payment_methods' && e.newValue) {
+          try { setLivePaymentMethods(JSON.parse(e.newValue)); } catch {}
         }
         loadStore();
         if (customerToken.get()) loadSession();
@@ -615,10 +630,12 @@ useEffect(() => {
     }
     return payload?.products || [];
   }, [payload, liveProducts]);
-  const paymentMethods = payload?.settings?.paymentMethods || [
+  const paymentMethods = livePaymentMethods && Array.isArray(livePaymentMethods) && livePaymentMethods.length > 0
+    ? livePaymentMethods
+    : (payload?.settings?.paymentMethods || [
     { id: 'pix', name: 'PIX', enabled: true, badge: 'Aprovação Imediata' },
     { id: 'credit_card', name: 'CARTÃO (ATENDIMENTO)', enabled: true, badge: 'Personalizado' }
-  ];
+  ]);
 
   const pixConfig = useMemo(
     () => ({
