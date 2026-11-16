@@ -982,7 +982,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                 <div className="flex-1 bg-[#15191e] rounded-md px-3 py-1 text-[11px] font-mono text-stone-300 flex items-center gap-1.5 border border-white/5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span className="text-emerald-400 font-semibold">https://</span>
-                  <span>fashionstylogirls.vercel.app</span>
+                  <span>{typeof window !== 'undefined' && window.location.host && !window.location.host.includes('localhost') ? window.location.host : 'fashionstyslogirls.vercel.app'}</span>
                 </div>
               </div>
             </div>
@@ -996,7 +996,7 @@ export function SettingsTab({ liveKey }: { liveKey: number }) {
                 ) : (
                   <Globe className="w-3.5 h-3.5" />
                 )}
-                <span className="truncate">fashionstylogirls.vercel.app</span>
+                <span className="truncate">{typeof window !== 'undefined' && window.location.host && !window.location.host.includes('localhost') ? window.location.host : 'fashionstyslogirls.vercel.app'}</span>
               </div>
               <p className="text-blue-600 dark:text-blue-400 font-medium text-xs hover:underline cursor-pointer truncate">
                 {customization.pageTitle || 'Flor de Seda | Moda Feminina Elegante & Peças Nobres'}
